@@ -12,13 +12,9 @@ namespace CsToTs {
             IEnumerable<GenericParameterDefinition> genericParameters = null, 
             IEnumerable<InterfaceDefinition> implementedInterfaces = null)
             : base(name, @namespace, members, genericParameters, implementedInterfaces) {
-            
-            Decorators = new List<DecoratorDefinition>();
         }
         
         public bool IsAbstract { get; }
         public TypeDefinition BaseType { get; }
-        
-        public IList<DecoratorDefinition> Decorators { get; }
     }
 }
