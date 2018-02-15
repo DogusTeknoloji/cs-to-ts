@@ -1,5 +1,6 @@
 ﻿namespace CsToTs {
-    public class Generator {
+    
+    public static class Generator {
         
     }
 }

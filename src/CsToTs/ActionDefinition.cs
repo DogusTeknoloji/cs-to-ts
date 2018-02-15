@@ -1,4 +1,5 @@
-﻿$HEADER$namespace $NAMESPACE$
-{
-  public class $CLASS$ {$END$}
+﻿namespace CsToTs {
+    public class ActionDefinition {
+        
+    }
 }

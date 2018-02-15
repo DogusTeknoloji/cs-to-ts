@@ -11,7 +11,8 @@ namespace CsToTs {
             string @namespace,
             IEnumerable<MemberDefinition> members,
             IEnumerable<GenericParameterDefinition> genericParameters = null, 
-            IEnumerable<InterfaceDefinition> implementedInterfaces = null) {
+            IEnumerable<InterfaceDefinition> implementedInterfaces = null,
+            IEnumerable<ActionDefinition> actions = null) {
 
             Name = name;
             Namespace = @namespace;
@@ -22,6 +23,7 @@ namespace CsToTs {
             Members = (members ?? Array.Empty<MemberDefinition>()).ToList().AsReadOnly();
             GenericParameters = (genericParameters ?? Array.Empty<GenericParameterDefinition>()).ToList().AsReadOnly();
             ImplementedInterfaces = (implementedInterfaces ?? Array.Empty<InterfaceDefinition>()).ToList().AsReadOnly();
+            Actions = (actions ?? Array.Empty<ActionDefinition>()).ToList().AsReadOnly();
         }
         
         public string Name { get; }
@@ -30,6 +32,7 @@ namespace CsToTs {
         public IReadOnlyCollection<MemberDefinition> Members { get; }
         public IReadOnlyCollection<GenericParameterDefinition> GenericParameters { get; }
         public IReadOnlyCollection<InterfaceDefinition> ImplementedInterfaces { get; }
+        public IReadOnlyCollection<ActionDefinition> Actions { get; }
 
         public virtual string FormatName() {
             return $"{Name}";

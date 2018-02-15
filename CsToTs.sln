@@ -6,6 +6,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DEDB2C70-5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsToTs", "src\CsToTs\CsToTs.csproj", "{B86B8011-0876-456A-84CC-457988D2A788}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsToTs.Tests", "tests\CsToTs.Tests\CsToTs.Tests.csproj", "{B2FC622B-7D17-4E2F-AB2C-DFBC4FA8F75F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,11 +15,16 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B86B8011-0876-456A-84CC-457988D2A788} = {C9756F8E-82FC-4C38-B7A9-BD3A407D29B4}
+		{B2FC622B-7D17-4E2F-AB2C-DFBC4FA8F75F} = {DEDB2C70-51CB-4040-AA27-B5E706125654}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B86B8011-0876-456A-84CC-457988D2A788}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B86B8011-0876-456A-84CC-457988D2A788}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B86B8011-0876-456A-84CC-457988D2A788}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B86B8011-0876-456A-84CC-457988D2A788}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2FC622B-7D17-4E2F-AB2C-DFBC4FA8F75F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2FC622B-7D17-4E2F-AB2C-DFBC4FA8F75F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2FC622B-7D17-4E2F-AB2C-DFBC4FA8F75F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2FC622B-7D17-4E2F-AB2C-DFBC4FA8F75F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
