@@ -4,12 +4,15 @@ namespace CsToTs {
     
     public class MemberDefinition {
 
-        public MemberDefinition(string name, string typeName) {
+        public MemberDefinition(string name, MemberType memberType, 
+                                MemberDeclaration declaration = MemberDeclaration.GetSet) {
             Name = name;
-            TypeName = typeName;
+            MemberType = memberType;
+            Declaration = declaration;
         }
         
         public string Name { get; }
-        public string TypeName { get; }
+        public MemberType MemberType { get; }
+        public MemberDeclaration Declaration { get; } 
     }
 }
