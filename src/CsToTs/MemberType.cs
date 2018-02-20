@@ -19,10 +19,10 @@ namespace CsToTs {
         public string TypeName { get; }
         public IReadOnlyCollection<MemberType> GenericParameters { get; }
         
-        public static MemberType String = new MemberType(typeof(string), DataType.String, "string");
-        public static MemberType Number = new MemberType(typeof(int), DataType.Number, "number");
-        public static MemberType Boolean = new MemberType(typeof(string), DataType.Boolean, "boolean");
-        public static MemberType Date = new MemberType(typeof(string), DataType.Date, "Date");
-        public static MemberType Any = new MemberType(typeof(object), DataType.Object, "any");
+        public static readonly MemberType String = new MemberType(typeof(string), DataType.String, "string");
+        public static readonly MemberType Number = new MemberType(typeof(int), DataType.Number, "number");
+        public static readonly MemberType Boolean = new MemberType(typeof(string), DataType.Boolean, "boolean");
+        public static readonly MemberType Date = new MemberType(typeof(string), DataType.Date, "Date");
+        public static readonly MemberType Any = new MemberType(typeof(object), DataType.Object, "any");
     }
 }

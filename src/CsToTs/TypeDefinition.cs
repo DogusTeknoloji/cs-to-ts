@@ -12,9 +12,9 @@ namespace CsToTs {
             string @namespace,
             IEnumerable<MemberDefinition> members,
             IEnumerable<GenericArgumentDefinition> genericArguments = null,
+            TypeDefinition baseType = null,
             IEnumerable<TypeDefinition> implementedInterfaces = null,
             IEnumerable<ActionDefinition> actions = null,
-            TypeDefinition baseType = null,
             bool isAbstract = false,
             bool isInterface = false) {
 
@@ -22,7 +22,13 @@ namespace CsToTs {
             Name = name;
             Namespace = @namespace;
             Members = (members ?? Array.Empty<MemberDefinition>()).ToList().AsReadOnly();
-            GenericArguments = (genericArguments ?? Array.Empty<GenericArgumentDefinition>()).ToList().AsReadOnly();
+            try {
+                GenericArguments = (genericArguments ?? Array.Empty<GenericArgumentDefinition>()).ToList().AsReadOnly();
+            }
+            catch (Exception e) {
+                Console.WriteLine(e);
+                throw;
+            }
             ImplementedInterfaces = (implementedInterfaces ?? Array.Empty<TypeDefinition>()).ToList().AsReadOnly();
             Actions = (actions ?? Array.Empty<ActionDefinition>()).ToList().AsReadOnly();
             BaseType = baseType;

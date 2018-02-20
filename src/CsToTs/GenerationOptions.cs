@@ -5,11 +5,11 @@ namespace CsToTs {
     
     public class GenerationOptions {
         private static readonly string[] DefaultSkipTypePatterns = {
-            @"System\.*"
+            @"^System\.*"
         };
 
         public GenerationOptions(IEnumerable<string> skipTypePatterns = null) {
-            
+            SkipTypePatterns = skipTypePatterns ?? DefaultSkipTypePatterns;
         }
         
         internal bool DateForDateTime { get; private set; }
@@ -19,7 +19,7 @@ namespace CsToTs {
             return this;
         }
 
-        internal IEnumerable<string> SkipTypePatterns { get; private set; } = DefaultSkipTypePatterns;
+        internal IEnumerable<string> SkipTypePatterns { get; private set; }
 
         public GenerationOptions WithSkipTypePatterns(IEnumerable<string> patterns) {
             if (patterns == null) {

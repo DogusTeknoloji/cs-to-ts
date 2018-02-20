@@ -22,25 +22,37 @@ namespace CsToTs {
         }
 
         private static TypeDefinition PopulateTypeDef(Type type, GenerationOptions options, List<TypeDefinition> defs) {
+            if (SkipCheck(type.AssemblyQualifiedName, options)) return null;
+            
             TypeDefinition baseType = null;
-            if (type.BaseType != null && !SkipCheck(type.BaseType.AssemblyQualifiedName, options)) {
+            if (type.BaseType != null) {
                 baseType = PopulateTypeDef(type.BaseType, options, defs);
             }
 
+            var memberDefs = GetMemberDefs(type, options, defs);
+            var genericArgumentDefs = GetGenericArgumentDefs(type, options, defs);
+            var interfaceDefs = GetInterfaceDefs(type, options, defs);
+            var actionDefs = GetActionDefs(type, options, defs);
             var def = new TypeDefinition(
                 type,
                 GetTypeName(type),
                 type.Namespace,
-                GetMemberDefs(type, options, defs),
-                GetGenericArgumentDefs(type, options, defs),
-                GetInterfaceDefs(type, options, defs),
-                GetActionDefs(type, options, defs),
+                memberDefs,
+                genericArgumentDefs,
                 baseType,
+                interfaceDefs,
+                actionDefs,
                 type.IsAbstract,
                 type.IsInterface
             );
-            defs.Add(def);
 
+            // constructed generics cannot be declared as types, we must generate their definitions instead
+            if (type.IsConstructedGenericType) {
+                PopulateTypeDef(type.GetGenericTypeDefinition(), options, defs);
+                return def;
+            }
+            
+            defs.Add(def);
             return def;
         }
 
@@ -63,7 +75,7 @@ namespace CsToTs {
                     new MemberDefinition(
                         property.N,
                         GetMemberType(property.T, options, defs),
-                        property.S != null ? MemberDeclaration.GetSet : MemberDeclaration.Get
+                        property.S ? MemberDeclaration.GetSet : MemberDeclaration.Get
                     )
                 );
             }
@@ -79,8 +91,8 @@ namespace CsToTs {
                 .Select(g => {
                         return new GenericArgumentDefinition(
                             g.Name,
-                            g.GetGenericParameterConstraints().Select(c => c.Name),
-                            g.GenericParameterAttributes.HasFlag(
+                            g.IsGenericType ? g.GetGenericParameterConstraints().Select(c => c.Name) : null,
+                            g.IsGenericType && g.GenericParameterAttributes.HasFlag(
                                 GenericParameterAttributes.DefaultConstructorConstraint)
                         );
                     }
@@ -90,19 +102,15 @@ namespace CsToTs {
         private static IEnumerable<TypeDefinition> GetInterfaceDefs(Type type, GenerationOptions options,
             List<TypeDefinition> defs) {
             var interfaces = type.GetInterfaces();
-            return interfaces.Select(i =>
-                new TypeDefinition(
-                    type.Name
-                )
-            );
+            return interfaces.Select(i => PopulateTypeDef(type, options, defs)).Where(t => t != null);
         }
 
         private static IEnumerable<ActionDefinition> GetActionDefs(Type type, GenerationOptions options,
             List<TypeDefinition> defs) {
-            throw new NotImplementedException();
+            return null; // todo
         }
 
-        private static MemberType GetMemberType(Type type, GenerationOptions options, List<TypeDefinition> defs) {
+        private static MemberType GetMemberType(Type type, GenerationOptions options, List<TypeDefinition> defs) {            
             if (type.IsGenericType) {
                 if (typeof(IEnumerable).IsAssignableFrom(type)) {
                     return new MemberType(
@@ -113,6 +121,10 @@ namespace CsToTs {
 
                 var genericPrms = type.GetGenericArguments().Select(t => GetMemberType(t, options, defs));
                 return new MemberType(type, DataType.Object, GetTypeName(type), genericPrms);
+            }
+            
+            if (type.IsGenericParameter) {
+                return new MemberType(type, DataType.Object, type.Name);
             }
 
             var typeCode = Type.GetTypeCode(type);
