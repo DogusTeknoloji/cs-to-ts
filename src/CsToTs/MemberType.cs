@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace CsToTs {
     
     public class MemberType {
 
-        public MemberType(Type clrType, DataType dataType, string typeName, 
+        public MemberType(MemberInfo clrMember, DataType dataType, string typeName, 
                           IEnumerable<MemberType> genericParameters = null) {
-            ClrType = clrType;
+            ClrMember = clrMember;
             DataType = dataType;
             TypeName = typeName;
             GenericParameters = (genericParameters ?? Array.Empty<MemberType>()).ToList().AsReadOnly();
         }
 
-        public Type ClrType { get; }
+        public MemberInfo ClrMember { get; }
         public DataType DataType { get; }
         public string TypeName { get; }
         public IReadOnlyCollection<MemberType> GenericParameters { get; }

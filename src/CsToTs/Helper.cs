@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -9,62 +10,85 @@ namespace CsToTs {
 
     public static class Helper {
         private static bool SkipCheck(string s, GenerationOptions o) =>
-            o.SkipTypePatterns.Any(p => Regex.Match(s, p).Success);
+            s != null && o.SkipTypePatterns.Any(p => Regex.Match(s, p).Success);
 
-        internal static IEnumerable<TypeDefinition> GetTypeDefinitions(IEnumerable<Type> types,
-            GenerationOptions options) {
-            var defs = new List<TypeDefinition>();
+        internal static GenerationContext GetTypeDefinitions(IEnumerable<Type> types,
+                                                             GenerationContext context) {
             foreach (var type in types) {
-                PopulateTypeDef(type, options ?? GenerationOptions.Default, defs);
+                if (type.IsEnum) {
+                    PopulateEnumDef(type, context);
+                }
+                else {
+                    PopulateTypeDef(type, context);
+                }
             }
 
-            return defs.AsReadOnly();
+            return context;
         }
 
-        private static TypeDefinition PopulateTypeDef(Type type, GenerationOptions options, List<TypeDefinition> defs) {
-            if (SkipCheck(type.AssemblyQualifiedName, options)) return null;
-            
+        private static TypeDefinition PopulateTypeDef(Type type, GenerationContext context) {
+            var existing = context.Types.FirstOrDefault(t => t.ClrType == type);
+            if (existing != null) return existing;
+
+            if (SkipCheck(type.ToString(), context.Options)) return null;
+
             TypeDefinition baseType = null;
-            if (type.BaseType != null) {
-                baseType = PopulateTypeDef(type.BaseType, options, defs);
+            if (type.BaseType != typeof(object) && type.BaseType != null) {
+                baseType = PopulateTypeDef(type.BaseType, context);
             }
 
-            var memberDefs = GetMemberDefs(type, options, defs);
-            var genericArgumentDefs = GetGenericArgumentDefs(type, options, defs);
-            var interfaceDefs = GetInterfaceDefs(type, options, defs);
-            var actionDefs = GetActionDefs(type, options, defs);
+            var memberDefs = GetMemberDefs(type, context);
+            var genericArgumentDefs = GetGenericArgumentDefs(type, context);
+            var interfaceDefs = GetInterfaceDefs(type, context);
+            var actionDefs = GetActionDefs(type, context);
             var def = new TypeDefinition(
                 type,
                 GetTypeName(type),
-                type.Namespace,
                 memberDefs,
                 genericArgumentDefs,
                 baseType,
                 interfaceDefs,
-                actionDefs,
-                type.IsAbstract,
-                type.IsInterface
+                actionDefs
             );
 
             // constructed generics cannot be declared as types, we must generate their definitions instead
             if (type.IsConstructedGenericType) {
-                PopulateTypeDef(type.GetGenericTypeDefinition(), options, defs);
+                PopulateTypeDef(type.GetGenericTypeDefinition(), context);
                 return def;
             }
             
-            defs.Add(def);
+            context.Types.Add(def);
             return def;
         }
 
-        private static IEnumerable<MemberDefinition> GetMemberDefs(Type type, GenerationOptions options,
-            List<TypeDefinition> defs) {
+        private static EnumDefinition PopulateEnumDef(Type type, GenerationContext context) {
+            var existing = context.Enums.FirstOrDefault(t => t.ClrType == type);
+            if (existing != null) return existing;
+
+            var names = Enum.GetNames(type);
+            var members = new List<EnumField>();
+            foreach (var name in names) {
+                var clrMember = type.GetField(name);
+                var value = Convert.ToInt32(Enum.Parse(type, name));
+
+                members.Add(
+                    new EnumField(clrMember, name, value)
+                );
+            }
+
+            var def = new EnumDefinition(type, type.Name, members);
+            context.Enums.Add(def);
+            return def;
+        }
+
+        private static IEnumerable<MemberDefinition> GetMemberDefs(Type type, GenerationContext context) {
             const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
             var memberDefs = new List<MemberDefinition>();
             var fields = type.GetFields(bindingFlags).Select(f => new {N = f.Name, T = f.FieldType});
             foreach (var field in fields) {
                 memberDefs.Add(
-                    new MemberDefinition(field.N, GetMemberType(field.T, options, defs), MemberDeclaration.Field)
+                    new MemberDefinition(field.N, GetMemberType(field.T, context), MemberDeclaration.Field)
                 );
             }
 
@@ -74,7 +98,7 @@ namespace CsToTs {
                 memberDefs.Add(
                     new MemberDefinition(
                         property.N,
-                        GetMemberType(property.T, options, defs),
+                        GetMemberType(property.T, context),
                         property.S ? MemberDeclaration.GetSet : MemberDeclaration.Get
                     )
                 );
@@ -83,43 +107,52 @@ namespace CsToTs {
             return memberDefs;
         }
 
-        private static IEnumerable<GenericArgumentDefinition> GetGenericArgumentDefs(Type type,
-            GenerationOptions options, List<TypeDefinition> defs) {
+        private static IEnumerable<GenericArgumentDefinition> GetGenericArgumentDefs(Type type, GenerationContext context) {
             if (!type.IsGenericType) return Array.Empty<GenericArgumentDefinition>();
 
             return type.GetGenericArguments()
                 .Select(g => {
+                        if (!g.IsGenericType) return new GenericArgumentDefinition(g.Name);
+
+                        var constraintTypes = new List<string>();
+                        var constraints = g.GetGenericParameterConstraints();
+                        for (var i = 0; i < constraints.Length - 1; i++) {
+                            var constraint = constraints[i];
+                            constraintTypes.Add(constraint.Name);
+                            PopulateTypeDef(constraint, context);
+                        }
+                        
                         return new GenericArgumentDefinition(
                             g.Name,
-                            g.IsGenericType ? g.GetGenericParameterConstraints().Select(c => c.Name) : null,
-                            g.IsGenericType && g.GenericParameterAttributes.HasFlag(
-                                GenericParameterAttributes.DefaultConstructorConstraint)
+                            constraintTypes,
+                            g.GenericParameterAttributes.HasFlag(
+                                GenericParameterAttributes.DefaultConstructorConstraint
+                            )
                         );
                     }
                 );
         }
 
-        private static IEnumerable<TypeDefinition> GetInterfaceDefs(Type type, GenerationOptions options,
-            List<TypeDefinition> defs) {
+        private static IEnumerable<TypeDefinition> GetInterfaceDefs(Type type, GenerationContext context) {
             var interfaces = type.GetInterfaces();
-            return interfaces.Select(i => PopulateTypeDef(type, options, defs)).Where(t => t != null);
+            var interfaceDefs = interfaces.Select(i => PopulateTypeDef(i, context));
+            return interfaceDefs.Where(t => t != null);
         }
 
-        private static IEnumerable<ActionDefinition> GetActionDefs(Type type, GenerationOptions options,
-            List<TypeDefinition> defs) {
+        private static IEnumerable<ActionDefinition> GetActionDefs(Type type, GenerationContext context) {
             return null; // todo
         }
 
-        private static MemberType GetMemberType(Type type, GenerationOptions options, List<TypeDefinition> defs) {            
+        private static MemberType GetMemberType(Type type, GenerationContext context) {            
             if (type.IsGenericType) {
                 if (typeof(IEnumerable).IsAssignableFrom(type)) {
                     return new MemberType(
                         type, DataType.Object, "Array",
-                        new[] {GetMemberType(type.GetGenericArguments()[0], options, defs)}
+                        new[] {GetMemberType(type.GetGenericArguments()[0], context)}
                     );
                 }
 
-                var genericPrms = type.GetGenericArguments().Select(t => GetMemberType(t, options, defs));
+                var genericPrms = type.GetGenericArguments().Select(t => GetMemberType(t, context));
                 return new MemberType(type, DataType.Object, GetTypeName(type), genericPrms);
             }
             
@@ -127,21 +160,23 @@ namespace CsToTs {
                 return new MemberType(type, DataType.Object, type.Name);
             }
 
+            if (type.IsEnum) {
+                PopulateEnumDef(type, context);
+                
+                return new MemberType(type, DataType.Object, type.Name);
+            }
+            
             var typeCode = Type.GetTypeCode(type);
             if (typeCode == TypeCode.Object) {
-                if (SkipCheck(type.AssemblyQualifiedName, options)) return MemberType.Any;
-
-                if (defs.All(d => d.ClrType != type)) {
-                    PopulateTypeDef(type, options, defs);
-                }
+                if (PopulateTypeDef(type, context) == null) return MemberType.Any;
                 
                 return new MemberType(type, DataType.Object, type.Name);
             }
 
-            return GetPrimitiveTypeName(typeCode, options);
+            return GetPrimitiveTypeName(typeCode);
         }
 
-        private static MemberType GetPrimitiveTypeName(TypeCode typeCode, GenerationOptions options) {
+        private static MemberType GetPrimitiveTypeName(TypeCode typeCode) {
             switch (typeCode) {
                 case TypeCode.Boolean:
                     return MemberType.Boolean;
@@ -161,7 +196,7 @@ namespace CsToTs {
                 case TypeCode.String:
                     return MemberType.String;
                 case TypeCode.DateTime:
-                    return options.DateForDateTime ? MemberType.Date : MemberType.String;
+                    return MemberType.Date;
                 default:
                     return MemberType.Any;
             }

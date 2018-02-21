@@ -8,6 +8,7 @@ namespace CsToTs.Tests.Fixture {
         public DateTime CreateDate { get; set; }
         public string UpdateUser { get; set; }
         public DateTime UpdateDate { get; set; }
+        public TypeEnum Type { get; set; }
         
         public bool Equals(T other) {
             return Equals(Id, other);

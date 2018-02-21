@@ -6,7 +6,7 @@ namespace CsToTs {
     
     public class GenericArgumentDefinition {
 
-        public GenericArgumentDefinition(string name, IEnumerable<string> typeConstraints,
+        public GenericArgumentDefinition(string name, IEnumerable<string> typeConstraints = null,
                                           bool hasNewConstraint = false) {
             Name = name;
             TypeConstraints = (typeConstraints ?? Array.Empty<string>()).ToList().AsReadOnly();

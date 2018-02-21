@@ -9,48 +9,30 @@ namespace CsToTs {
         public TypeDefinition(
             Type clrType,
             string name,
-            string @namespace,
             IEnumerable<MemberDefinition> members,
             IEnumerable<GenericArgumentDefinition> genericArguments = null,
             TypeDefinition baseType = null,
             IEnumerable<TypeDefinition> implementedInterfaces = null,
-            IEnumerable<ActionDefinition> actions = null,
-            bool isAbstract = false,
-            bool isInterface = false) {
+            IEnumerable<ActionDefinition> actions = null) {
 
             ClrType = clrType;
             Name = name;
-            Namespace = @namespace;
+            Namespace = clrType.Namespace;
             Members = (members ?? Array.Empty<MemberDefinition>()).ToList().AsReadOnly();
-            try {
-                GenericArguments = (genericArguments ?? Array.Empty<GenericArgumentDefinition>()).ToList().AsReadOnly();
-            }
-            catch (Exception e) {
-                Console.WriteLine(e);
-                throw;
-            }
+            GenericArguments = (genericArguments ?? Array.Empty<GenericArgumentDefinition>()).ToList().AsReadOnly();
             ImplementedInterfaces = (implementedInterfaces ?? Array.Empty<TypeDefinition>()).ToList().AsReadOnly();
             Actions = (actions ?? Array.Empty<ActionDefinition>()).ToList().AsReadOnly();
             BaseType = baseType;
-            IsAbstract = isAbstract;
-            IsInterface = isInterface;
+            IsAbstract = clrType.IsAbstract;
+            TypeKind = clrType.IsEnum ? TypeKind.Enum
+                : clrType.IsInterface ? TypeKind.Interface 
+                                      : TypeKind.Type;
             
             FullName = Helper.GetFullName(this);
             
-            NamespacePath = string.IsNullOrEmpty(@namespace)
+            NamespacePath = string.IsNullOrEmpty(Namespace)
                 ? Array.Empty<string>()
-                : @namespace.Split('.');
-                
-            AsInterfaceDeclaration = baseType != null
-                ? $""
-                : $"";
-
-            if (isInterface) {
-                AsTypeDeclaration = AsInterfaceDeclaration;
-            }
-            else {
-                AsTypeDeclaration = "";
-            }
+                : Namespace.Split('.');
         }
         
         public Type ClrType { get; }
@@ -62,13 +44,9 @@ namespace CsToTs {
         public IReadOnlyCollection<ActionDefinition> Actions { get; }
         public TypeDefinition BaseType { get; }
         public bool IsAbstract { get; }
-        public bool IsInterface { get; }
+        public TypeKind TypeKind { get; }
         
         public string FullName { get; }
         public IReadOnlyCollection<string> NamespacePath { get; }
-        public string AsTypeDeclaration { get; }
-        public string AsInterfaceDeclaration { get; }
-        public string AsDeclaration { get; }
-        public string AsReference { get; }
     }
 }
