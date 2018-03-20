@@ -2,18 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using CsToTs.Definitions;
 
 namespace CsToTs {
 
-    public static class Helper {
-        private static bool SkipCheck(string s, GenerationOptions o) =>
+    public static class ReflectHelper {
+        private static bool SkipCheck(string s, ReflectOptions o) =>
             s != null && o.SkipTypePatterns.Any(p => Regex.Match(s, p).Success);
 
-        internal static GenerationContext GetTypeDefinitions(IEnumerable<Type> types,
-                                                             GenerationContext context) {
+        internal static void PopulateTypeDefinitions(IEnumerable<Type> types, GenerationContext context) {
             foreach (var type in types) {
                 if (type.IsEnum) {
                     PopulateEnumDef(type, context);
@@ -22,8 +21,6 @@ namespace CsToTs {
                     PopulateTypeDef(type, context);
                 }
             }
-
-            return context;
         }
 
         private static TypeDefinition PopulateTypeDef(Type type, GenerationContext context) {
@@ -61,9 +58,9 @@ namespace CsToTs {
             return def;
         }
 
-        private static EnumDefinition PopulateEnumDef(Type type, GenerationContext context) {
+        private static void PopulateEnumDef(Type type, GenerationContext context) {
             var existing = context.Enums.FirstOrDefault(t => t.ClrType == type);
-            if (existing != null) return existing;
+            if (existing != null) return;
 
             var names = Enum.GetNames(type);
             var members = new List<EnumField>();
@@ -78,7 +75,6 @@ namespace CsToTs {
 
             var def = new EnumDefinition(type, type.Name, members);
             context.Enums.Add(def);
-            return def;
         }
 
         private static IEnumerable<MemberDefinition> GetMemberDefs(Type type, GenerationContext context) {
@@ -107,7 +103,8 @@ namespace CsToTs {
             return memberDefs;
         }
 
-        private static IEnumerable<GenericArgumentDefinition> GetGenericArgumentDefs(Type type, GenerationContext context) {
+        private static IEnumerable<GenericArgumentDefinition> GetGenericArgumentDefs(Type type,
+            GenerationContext context) {
             if (!type.IsGenericType) return Array.Empty<GenericArgumentDefinition>();
 
             return type.GetGenericArguments()
@@ -121,7 +118,7 @@ namespace CsToTs {
                             constraintTypes.Add(constraint.Name);
                             PopulateTypeDef(constraint, context);
                         }
-                        
+
                         return new GenericArgumentDefinition(
                             g.Name,
                             constraintTypes,
@@ -173,10 +170,10 @@ namespace CsToTs {
                 return new MemberType(type, DataType.Object, type.Name);
             }
 
-            return GetPrimitiveTypeName(typeCode);
+            return GetPrimitiveMemberType(typeCode);
         }
 
-        private static MemberType GetPrimitiveTypeName(TypeCode typeCode) {
+        private static MemberType GetPrimitiveMemberType(TypeCode typeCode) {
             switch (typeCode) {
                 case TypeCode.Boolean:
                     return MemberType.Boolean;

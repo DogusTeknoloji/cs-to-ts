@@ -1,36 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace CsToTs {
+﻿namespace CsToTs {
     
-    public class GenerationOptions {
-        private static readonly string[] DefaultSkipTypePatterns = {
-            @"^System\.*"
-        };
+    public class GenerationOptions: ReflectOptions {
+        public static GenerationOptions Default { get; } = new GenerationOptions();
 
-        public GenerationOptions(IEnumerable<string> skipTypePatterns = null) {
-            SkipTypePatterns = skipTypePatterns ?? DefaultSkipTypePatterns;
-        }
-        
-        internal bool DateForDateTime { get; private set; }
+        public bool UseDateForDateTime { get; set; }
 
-        public GenerationOptions UseDateForDateTime(bool value = true) {
-            this.DateForDateTime = value;
-            return this;
-        }
+        public bool GenerateReadOnlyProps { get; set; }
 
-        internal IEnumerable<string> SkipTypePatterns { get; private set; }
+        private bool GeneratePropertiesForProps { get; set; }
 
-        public GenerationOptions WithSkipTypePatterns(IEnumerable<string> patterns) {
-            if (patterns == null) {
-                SkipTypePatterns = DefaultSkipTypePatterns;
-                return this;
-            }
+        public string Template { get; set; }
 
-            SkipTypePatterns = patterns.Union(DefaultSkipTypePatterns);
-            return this;
-        }
-        
-        public static GenerationOptions Default { get; } = new GenerationOptions(); 
+        private string Header { get; set; }
     }
 }

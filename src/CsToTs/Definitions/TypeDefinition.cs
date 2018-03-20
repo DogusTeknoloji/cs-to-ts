@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CsToTs {
+namespace CsToTs.Definitions {
     
     public class TypeDefinition {
 
@@ -28,7 +28,7 @@ namespace CsToTs {
                 : clrType.IsInterface ? TypeKind.Interface 
                                       : TypeKind.Type;
             
-            FullName = Helper.GetFullName(this);
+            FullName = ReflectHelper.GetFullName(this);
             
             NamespacePath = string.IsNullOrEmpty(Namespace)
                 ? Array.Empty<string>()

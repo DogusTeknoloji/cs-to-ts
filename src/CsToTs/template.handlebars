@@ -1,0 +1,18 @@
+{{#Types}}
+    
+export class {{ShortName}} extends {{#if BaseTypeName}}{{BaseTypeName}}{{else}}indigo.EntityBase{{/if}} {
+
+    {{#Members}}
+    {{Name}}: ;
+    {{/Members}}
+}
+{{/Types}}
+{{#Enums}}
+
+export enum {{Name}} {
+    {{#Members}}
+    {{Name}} = {{Value}},
+    {{/Members}}
+}
+{{/Enums}}
+

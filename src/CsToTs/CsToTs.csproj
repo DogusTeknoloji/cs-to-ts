@@ -2,4 +2,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Handlebars.Net" Version="1.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="template.handlebars" />
+  </ItemGroup>
 </Project>

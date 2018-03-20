@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace CsToTs {
+namespace CsToTs.Definitions {
     
     public class EnumField {
 

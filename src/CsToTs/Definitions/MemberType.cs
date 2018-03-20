@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace CsToTs {
+namespace CsToTs.Definitions {
     
     public class MemberType {
 

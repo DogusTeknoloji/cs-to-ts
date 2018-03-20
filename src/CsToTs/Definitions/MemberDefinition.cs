@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CsToTs {
+﻿namespace CsToTs.Definitions {
     
     public class MemberDefinition {
 

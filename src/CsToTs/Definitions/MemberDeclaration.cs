@@ -1,4 +1,4 @@
-﻿namespace CsToTs {
+﻿namespace CsToTs.Definitions {
     
     public enum MemberDeclaration {
         GetSet,

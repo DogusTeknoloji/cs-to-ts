@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CsToTs {
+namespace CsToTs.Definitions {
     
     public class EnumDefinition {
 

@@ -1,4 +1,5 @@
 using System.Linq;
+using CsToTs.Definitions;
 using CsToTs.Tests.Fixture;
 using Xunit;
 
@@ -52,7 +53,7 @@ namespace CsToTs.Tests {
 
                 var gen = bas.GenericArguments.First();
                 Assert.False(gen.HasNewConstraint);
-                Assert.Equal("T", gen.Name);
+                Assert.Equal("TKey", gen.Name);
                 Assert.Equal(0, gen.TypeConstraints.Count);
 
                 var inter = bas.ImplementedInterfaces;
@@ -66,7 +67,7 @@ namespace CsToTs.Tests {
 
                 var idMember = mem.FirstOrDefault(m => m.Name == "Id");
                 Assert.NotNull(idMember);
-                Assert.Equal("T", idMember.MemberType.TypeName);
+                Assert.Equal("TKey", idMember.MemberType.TypeName);
                 Assert.Equal(DataType.Object, idMember.MemberType.DataType);
                 Assert.Equal(0, idMember.MemberType.GenericParameters.Count);
                 Assert.Equal(MemberDeclaration.GetSet, idMember.Declaration);
