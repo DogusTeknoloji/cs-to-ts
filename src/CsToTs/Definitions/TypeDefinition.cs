@@ -10,43 +10,29 @@ namespace CsToTs.Definitions {
             Type clrType,
             string name,
             IEnumerable<MemberDefinition> members,
-            IEnumerable<GenericArgumentDefinition> genericArguments = null,
+            IEnumerable<GenericParameterDefinition> genericParameters = null,
             TypeDefinition baseType = null,
-            IEnumerable<TypeDefinition> implementedInterfaces = null,
-            IEnumerable<ActionDefinition> actions = null) {
+            IEnumerable<TypeDefinition> implementedInterfaces = null) {
 
             ClrType = clrType;
             Name = name;
             Namespace = clrType.Namespace;
             Members = (members ?? Array.Empty<MemberDefinition>()).ToList().AsReadOnly();
-            GenericArguments = (genericArguments ?? Array.Empty<GenericArgumentDefinition>()).ToList().AsReadOnly();
+            GenericParameters = (genericParameters ?? Array.Empty<GenericParameterDefinition>()).ToList().AsReadOnly();
             ImplementedInterfaces = (implementedInterfaces ?? Array.Empty<TypeDefinition>()).ToList().AsReadOnly();
-            Actions = (actions ?? Array.Empty<ActionDefinition>()).ToList().AsReadOnly();
             BaseType = baseType;
             IsAbstract = clrType.IsAbstract;
-            TypeKind = clrType.IsEnum ? TypeKind.Enum
-                : clrType.IsInterface ? TypeKind.Interface 
-                                      : TypeKind.Type;
-            
-            FullName = ReflectHelper.GetFullName(this);
-            
-            NamespacePath = string.IsNullOrEmpty(Namespace)
-                ? Array.Empty<string>()
-                : Namespace.Split('.');
+            TypeKind = clrType.IsInterface ? TypeKind.Interface : TypeKind.Type;
         }
         
         public Type ClrType { get; }
         public string Name { get; }
         public string Namespace { get; }
         public IReadOnlyCollection<MemberDefinition> Members { get; }
-        public IReadOnlyCollection<GenericArgumentDefinition> GenericArguments { get; }
+        public IReadOnlyCollection<GenericParameterDefinition> GenericParameters { get; }
         public IReadOnlyCollection<TypeDefinition> ImplementedInterfaces { get; }
-        public IReadOnlyCollection<ActionDefinition> Actions { get; }
         public TypeDefinition BaseType { get; }
         public bool IsAbstract { get; }
         public TypeKind TypeKind { get; }
-        
-        public string FullName { get; }
-        public IReadOnlyCollection<string> NamespacePath { get; }
     }
 }

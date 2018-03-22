@@ -2,20 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CsToTs.Definitions {
+namespace CsToTs.TypeScript {
     
     public class EnumDefinition {
 
-        public EnumDefinition(Type clrType, string name, IEnumerable<EnumField> fields) {
-            ClrType = clrType;
+        public EnumDefinition(string name, IEnumerable<EnumField> fields) {
             Name = name;
-            Namespace = clrType.Namespace;
             Fields = (fields ?? Array.Empty<EnumField>()).ToList().AsReadOnly();
         }
         
-        public Type ClrType { get; }
         public string Name { get; }
-        public string Namespace { get; }
         public IReadOnlyCollection<EnumField> Fields { get; }
     }
 }

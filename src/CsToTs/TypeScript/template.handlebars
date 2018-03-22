@@ -1,9 +1,9 @@
 {{#Types}}
     
-export class {{ShortName}} extends {{#if BaseTypeName}}{{BaseTypeName}}{{else}}indigo.EntityBase{{/if}} {
+{{Declaration}} {
 
     {{#Members}}
-    {{Name}}: ;
+    {{Name}}: {{Type}};
     {{/Members}}
 }
 {{/Types}}

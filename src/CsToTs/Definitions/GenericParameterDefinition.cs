@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace CsToTs.Definitions {
     
-    public class GenericArgumentDefinition {
+    public class GenericParameterDefinition {
 
-        public GenericArgumentDefinition(string name, IEnumerable<string> typeConstraints = null,
+        public GenericParameterDefinition(string name, IEnumerable<string> typeConstraints = null,
                                           bool hasNewConstraint = false) {
             Name = name;
             TypeConstraints = (typeConstraints ?? Array.Empty<string>()).ToList().AsReadOnly();

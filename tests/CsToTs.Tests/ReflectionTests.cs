@@ -17,9 +17,9 @@ namespace CsToTs.Tests {
                 Assert.Equal(1, types.Count());
 
                 var ibase = types.First();
-                Assert.Equal(1, ibase.GenericArguments.Count);
+                Assert.Equal(1, ibase.GenericParameters.Count);
 
-                var gen = ibase.GenericArguments.First();
+                var gen = ibase.GenericParameters.First();
                 Assert.False(gen.HasNewConstraint);
                 Assert.Equal("T", gen.Name);
                 Assert.Equal(0, gen.TypeConstraints.Count);
@@ -29,10 +29,6 @@ namespace CsToTs.Tests {
 
                 var id = mem.First();
                 Assert.Equal("Id", id.Name);
-                Assert.Equal("T", id.MemberType.TypeName);
-                Assert.Equal(DataType.Object, id.MemberType.DataType);
-                Assert.Equal(0, id.MemberType.GenericParameters.Count);
-                Assert.Equal(MemberDeclaration.GetSet, id.Declaration);
                 
                 Assert.Equal(0, res.Enums.Count);
             }
@@ -49,9 +45,9 @@ namespace CsToTs.Tests {
 
                 // interface should be first, so we take the last type definition
                 var bas = types.Last();
-                Assert.Equal(1, bas.GenericArguments.Count);
+                Assert.Equal(1, bas.GenericParameters.Count);
 
-                var gen = bas.GenericArguments.First();
+                var gen = bas.GenericParameters.First();
                 Assert.False(gen.HasNewConstraint);
                 Assert.Equal("TKey", gen.Name);
                 Assert.Equal(0, gen.TypeConstraints.Count);
@@ -67,10 +63,6 @@ namespace CsToTs.Tests {
 
                 var idMember = mem.FirstOrDefault(m => m.Name == "Id");
                 Assert.NotNull(idMember);
-                Assert.Equal("TKey", idMember.MemberType.TypeName);
-                Assert.Equal(DataType.Object, idMember.MemberType.DataType);
-                Assert.Equal(0, idMember.MemberType.GenericParameters.Count);
-                Assert.Equal(MemberDeclaration.GetSet, idMember.Declaration);
 
                 var typeMember = mem.FirstOrDefault(m => m.Name == "Type");
                 Assert.NotNull(typeMember);
@@ -80,7 +72,6 @@ namespace CsToTs.Tests {
 
                 var typeEnum = enums.First();
                 Assert.Equal("TypeEnum", typeEnum.Name);
-                Assert.Equal("TypeEnum", typeMember.MemberType.TypeName);
 
                 var typeFields = typeEnum.Fields;
                 Assert.Equal(2, typeFields.Count);
