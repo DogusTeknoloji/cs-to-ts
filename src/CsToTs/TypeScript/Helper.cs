@@ -111,26 +111,24 @@ namespace CsToTs.TypeScript {
         private static string GetTypeName(Type type, TypeScriptContext context) {
             if (!type.IsGenericType) return type.Name;
 
-            var typeName = StripGenericFromName(type);
-
             var genericPrms = type.GetGenericArguments().Select(g => {
                 var constraints = g.GetGenericParameterConstraints()
                     .Where(c => PopulateTypeDefinition(c, context) != null)
                     .Select(c => GetTypeRef(c, context))
                     .ToList();
 
-                if (g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
-                    constraints.Add($"{{ new(): {g.Name}}}");
+                if (g.IsClass && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
+                    constraints.Add($"{{ new(): {g.Name} }}");
                 }
 
                 if (constraints.Any()) {
-                    typeName = $"{g.Name} extends {string.Join(" & ", constraints) }";
+                    return $"{g.Name} extends {string.Join(" & ", constraints)}";
                 }
 
-                return typeName;
+                return g.Name;
             });
 
-            return string.Join(", ", genericPrms);
+            return $"{StripGenericFromName(type)}<{string.Join(", ", genericPrms)}>";
         }
 
         private static string GetTypeRef(Type type, TypeScriptContext context) {
