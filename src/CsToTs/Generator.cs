@@ -9,7 +9,7 @@ namespace CsToTs {
         }
 
         public static string GenerateTypeScript(TypeScriptOptions options = null, params Type[] types) {
-            return TypeScript.Helper.GenerateTypeScript(types, options);
+            return TypeScript.Helper.GenerateTypeScript(types, options ?? TypeScriptOptions.Default);
         }
     }
 }
