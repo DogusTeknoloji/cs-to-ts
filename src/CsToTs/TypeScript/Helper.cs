@@ -78,9 +78,9 @@ namespace CsToTs.TypeScript {
             return typeDef;
         }
 
-        private static void PopulateEnumDefinition(Type type, TypeScriptContext context) {
+        private static EnumDefinition PopulateEnumDefinition(Type type, TypeScriptContext context) {
             var existing = context.Enums.FirstOrDefault(t => t.ClrType == type);
-            if (existing != null) return;
+            if (existing != null) return existing;
 
             var names = Enum.GetNames(type);
             var members = new List<EnumField>();
@@ -91,6 +91,7 @@ namespace CsToTs.TypeScript {
 
             var def = new EnumDefinition(type.Name, members);
             context.Enums.Add(def);
+            return def;
         }
         
         private static IEnumerable<MemberDefinition> GetMembers(Type type, TypeScriptContext context) {
@@ -134,9 +135,11 @@ namespace CsToTs.TypeScript {
         private static string GetTypeRef(Type type, TypeScriptContext context) {
             if (type.IsGenericParameter)
                 return type.Name;
-            
-            if (type.IsEnum)
-                return context.Enums.Any(e => e.ClrType == type) ? type.Name : "any";
+
+            if (type.IsEnum) {
+                var enumDef = PopulateEnumDefinition(type, context);
+                return enumDef != null ? type.Name : "any";
+            }
 
             var typeCode = Type.GetTypeCode(type);
             if (typeCode != TypeCode.Object) 
