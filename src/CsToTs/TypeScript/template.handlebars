@@ -1,7 +1,6 @@
 {{#Types}}
     
 {{Declaration}} {
-
     {{#Members}}
     {{Name}}: {{Type}};
     {{/Members}}
@@ -10,9 +9,9 @@
 {{#Enums}}
 
 export enum {{Name}} {
-    {{#Members}}
+    {{#Fields}}
     {{Name}} = {{Value}},
-    {{/Members}}
+    {{/Fields}}
 }
 {{/Enums}}
 

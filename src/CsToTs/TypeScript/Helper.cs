@@ -82,12 +82,8 @@ namespace CsToTs.TypeScript {
             var existing = context.Enums.FirstOrDefault(t => t.ClrType == type);
             if (existing != null) return existing;
 
-            var names = Enum.GetNames(type);
-            var members = new List<EnumField>();
-            foreach (var name in names) {
-                var value = Convert.ToInt32(Enum.Parse(type, name));
-                members.Add(new EnumField(name, value.ToString()));
-            }
+            var members = Enum.GetNames(type)
+                .Select(n => new EnumField(n, Convert.ToInt32(Enum.Parse(type, n)).ToString()));
 
             var def = new EnumDefinition(type.Name, members);
             context.Enums.Add(def);
