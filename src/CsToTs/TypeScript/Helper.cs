@@ -55,7 +55,7 @@ namespace CsToTs.TypeScript {
             var interfaces = type.GetInterfaces().ToList();
 
             var declaration = GetTypeName(type, context);
-            if (type.BaseType != typeof(object)) {
+            if (type.BaseType != null && type.BaseType != typeof(object)) {
                 if (type.IsInterface || context.Options.UseInterfaceForClasses) {
                     interfaces.Insert(0, type.BaseType);
                 }
@@ -120,11 +120,11 @@ namespace CsToTs.TypeScript {
                     .ToList();
 
                 if (g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
-                    constraints.Add($"{{ new() => {g.Name}}}");
+                    constraints.Add($"{{ new(): {g.Name}}}");
                 }
 
                 if (constraints.Any()) {
-                    typeName = $"{typeName} extends {string.Join(" & ", constraints)}";
+                    typeName = $"{g.Name} extends {string.Join(" & ", constraints) }";
                 }
 
                 return typeName;
