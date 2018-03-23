@@ -11,6 +11,7 @@ namespace CsToTs.TypeScript {
             Fields = (fields ?? Array.Empty<EnumField>()).ToList().AsReadOnly();
         }
         
+        public Type ClrType { get; }
         public string Name { get; }
         public IReadOnlyCollection<EnumField> Fields { get; }
     }

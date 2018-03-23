@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CsToTs.TypeScript {
     
     public class TypeDefinition {
 
-        public TypeDefinition(string declaration, IEnumerable<MemberDefinition> members) {
-            Declaration = declaration;
-            Members = (members ?? Enumerable.Empty<MemberDefinition>()).ToList().AsReadOnly();
+        public TypeDefinition(Type clrType) {
+            ClrType = clrType;
+            Members = new List<MemberDefinition>();
         }
         
-        public string Declaration { get; }
-        public IReadOnlyCollection<MemberDefinition> Members { get; }
+        public Type ClrType { get; }
+        public string Declaration { get; set; }
+        public List<MemberDefinition> Members { get; }
     }
 }
