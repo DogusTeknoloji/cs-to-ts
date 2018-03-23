@@ -54,13 +54,16 @@ namespace CsToTs.TypeScript {
 
             var interfaces = type.GetInterfaces().ToList();
 
+            var isInterface = type.IsInterface || context.Options.UseInterfaceForClasses;
             var declaration = GetTypeName(type, context);
+            declaration = isInterface ? $"export interface {declaration}" : $"export class {declaration}";
+            
             if (type.BaseType != null && type.BaseType != typeof(object)) {
-                if (type.IsInterface || context.Options.UseInterfaceForClasses) {
+                if (isInterface) {
                     interfaces.Insert(0, type.BaseType);
                 }
                 else if (PopulateTypeDefinition(type.BaseType, context) != null) {
-                    declaration += $" extends {GetTypeRef(type.BaseType, context)}";
+                    declaration = $"{declaration} extends {GetTypeRef(type.BaseType, context)}";
                 }
             }
 
@@ -69,12 +72,14 @@ namespace CsToTs.TypeScript {
             var typeDef = new TypeDefinition(type);
             context.Types.Add(typeDef);
 
-            var interfacesStr = interfaces.Any() 
-                ? $" implements {string.Join(", ", interfaces.Select(i => GetTypeRef(i, context)))}"
-                : string.Empty;
-            typeDef.Declaration = $"export class {declaration}{interfacesStr}";
+            if (interfaces.Any()) {
+                declaration =
+                    $"{declaration} implements {string.Join(", ", interfaces.Select(i => GetTypeRef(i, context)))}";
+            }
             
+            typeDef.Declaration = declaration;
             typeDef.Members.AddRange(GetMembers(type, context));
+
             return typeDef;
         }
 
@@ -87,6 +92,7 @@ namespace CsToTs.TypeScript {
 
             var def = new EnumDefinition(type.Name, members);
             context.Enums.Add(def);
+            
             return def;
         }
         
