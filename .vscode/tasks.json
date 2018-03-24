@@ -2,12 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "test",
             "command": "dotnet",
-            "type": "process",
+            "type": "shell",
             "args": [
-                "build",
-                "${workspaceFolder}/tests/CsToTs.Tests/CsToTs.Tests.csproj"
+                "test",
+                "${workspaceFolder}/tests/CsToTs.Tests/CsToTs.Tests.csproj",
+                "/p:CollectCoverage=true",
+                "/p:CoverletOutputFormat=opencover"
             ],
             "problemMatcher": "$msCompile"
         }

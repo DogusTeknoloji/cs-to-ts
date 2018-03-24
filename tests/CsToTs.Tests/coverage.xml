@@ -2,9 +2,9 @@
 <CoverageSession>
   <Summary numSequencePoints="184" visitedSequencePoints="139" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="0" branchCoverage="0" maxCyclomaticComplexity="0" minCyclomaticComplexity="0" visitedClasses="10" numClasses="10" visitedMethods="44" numMethods="46" />
   <Modules>
-    <Module hash="903626C7-6C01-41F7-98A4-08BDF653C816">
+    <Module hash="A8C8A58B-B8A6-4C2C-8927-37720DDE629E">
       <ModulePath>/Users/umutozel/Code/github.com/DogusTeknoloji/cs-to-ts/tests/CsToTs.Tests/bin/Debug/netcoreapp2.0/CsToTs.dll</ModulePath>
-      <ModuleTime>2018-03-24T01:26:11</ModuleTime>
+      <ModuleTime>2018-03-24T01:45:51</ModuleTime>
       <ModuleName>CsToTs</ModuleName>
       <Files>
         <File uid="1" fullPath="/Users/umutozel/Code/github.com/DogusTeknoloji/cs-to-ts/src/CsToTs/Generator.cs" />
