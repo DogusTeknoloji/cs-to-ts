@@ -6,7 +6,7 @@ namespace CsToTs.TypeScript {
     
     public class EnumDefinition {
 
-        public EnumDefinition(string name, IEnumerable<EnumField> fields) {
+        public EnumDefinition(Type clrType, string name, IEnumerable<EnumField> fields) {
             Name = name;
             Fields = (fields ?? Array.Empty<EnumField>()).ToList().AsReadOnly();
         }

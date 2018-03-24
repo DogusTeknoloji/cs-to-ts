@@ -90,7 +90,7 @@ namespace CsToTs.TypeScript {
             var members = Enum.GetNames(type)
                 .Select(n => new EnumField(n, Convert.ToInt32(Enum.Parse(type, n)).ToString()));
 
-            var def = new EnumDefinition(type.Name, members);
+            var def = new EnumDefinition(type, type.Name, members);
             context.Enums.Add(def);
             
             return def;
