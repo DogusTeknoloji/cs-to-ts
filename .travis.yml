@@ -1,0 +1,9 @@
+language: csharp
+solution: CsToTs.sln
+git:
+  depth: 1
+branches:
+  only:
+    - master
+script:
+  - dotnet test ./tests/CsToTs.Tests
