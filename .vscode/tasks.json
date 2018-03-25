@@ -4,15 +4,47 @@
         {
             "label": "build",
             "command": "dotnet",
-            "type": "shell",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/tests/CsToTs.Tests/CsToTs.Tests.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
             "args": [
                 "test",
-                "${workspaceFolder}/tests/CsToTs.Tests/CsToTs.Tests.csproj",
+                "${workspaceFolder}/tests/CsToTs.Tests/CsToTs.Tests.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "test with coverage",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
                 "/p:CollectCoverage=true",
                 "/p:CoverletOutputFormat=lcov",
-                "/p:CoverletOutput=${workspaceFolder}/lcov.info"
+                "/p:CoverletOutput=./lcov.info",
+                "${workspaceFolder}/tests/CsToTs.Tests/CsToTs.Tests.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         }
     ]
 }
