@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Authors>Umut Özel - Doğuş Teknoloji</Authors>
-    <description>Generate TypeScript codes from C#.</description>
+    <description>Generate TypeScript from C#.</description>
     <copyright>Copyright (c) 2018</copyright>
     <PackageLicenseUrl>https://github.com/DogusTeknoloji/cs-to-ts/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/DogusTeknoloji/cs-to-ts</PackageProjectUrl>
@@ -11,13 +12,22 @@
     <PackageTags>C# CSharp TypeScript converter generator</PackageTags>
     <RepositoryUrl>https://github.com/DogusTeknoloji/cs-to-ts</RepositoryUrl>
   </PropertyGroup>
+
   <PropertyGroup>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Handlebars.Net" Version="1.9.0" />
   </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include=".\TypeScript\template.handlebars" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <DebugType>full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
+  </PropertyGroup>
+
 </Project>
