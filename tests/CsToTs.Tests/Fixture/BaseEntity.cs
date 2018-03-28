@@ -10,6 +10,7 @@ namespace CsToTs.Tests.Fixture {
         public DateTime UpdateDate { get; set; }
         public bool IsActive { get; set;}
         public TypeEnum Type;
+        public InternalType InternalType { get; set; }
         
         public bool Equals(TKey other) {
             return Equals(Id, other);

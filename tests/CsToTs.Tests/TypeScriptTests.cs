@@ -5,7 +5,11 @@ using Xunit;
 
 namespace CsToTs.Tests {
 
-    public class GenerationTests {
+    public class TypeScriptTests {
+
+        public TypeScriptTests() {
+            TypeScriptOptions.Default.SkipTypePatterns = new[] { "InternalType" };
+        }
 
         [Fact]
         public void ShouldGenerateOpenGenericInterface() {
@@ -42,6 +46,7 @@ namespace CsToTs.Tests {
             Assert.Contains("UpdateDate: string", baseEntity);
             Assert.Contains("IsActive: boolean", baseEntity);
             Assert.Contains("Type: TypeEnum", baseEntity);
+            Assert.Contains("InternalType: any", baseEntity);
 
             var typeEnum = GetGeneratedType(gen, "export enum TypeEnum");
             Assert.NotEmpty(typeEnum);
@@ -67,19 +72,41 @@ namespace CsToTs.Tests {
 
             var address = GetGeneratedType(gen, "export class Address");
             Assert.NotEmpty(address);
+            Assert.Contains("CompanyId: number", address);
             Assert.Contains("City: string", address);
             Assert.Contains("Detail: string", address);
+            Assert.Contains("PostalCode: number", address);
 
-            var company = GetGeneratedType(gen, "export class Company<TAddress extends Address>");
+            var company = GetGeneratedType(gen, "export class Company");
             Assert.NotEmpty(company);
-            Assert.Contains("Address: TAddress", company);
+            Assert.Contains("Income: number", gen);
+            Assert.Contains("Address: Array<TAddress>", company);
             Assert.Contains("extends BaseEntity<number>", company);
+
+            var constraints = Regex.Match(company, "<.*?>").Value;
+            Assert.Contains("Address", constraints);
+            Assert.True(constraints.Contains("TAddress extends Address & { new(): TAddress }"));
         }
 
         [Fact]
         public void ShouldGenerateWithCorrectOrder() {
             var gen = Generator.GenerateTypeScript(typeof(Company<>));
-            //todo
+
+            var ibaseIdx = gen.IndexOf("export interface IBase");
+            Assert.NotEqual(-1, ibaseIdx);
+
+            var baseEntityIdx = gen.IndexOf("export abstract class BaseEntity");
+            Assert.NotEqual(-1, baseEntityIdx);
+
+            var addressIdx = gen.IndexOf("export class Address");
+            Assert.NotEqual(-1, addressIdx);
+
+            var companyIdx = gen.IndexOf("export class Company");
+            Assert.NotEqual(-1, companyIdx);
+
+            Assert.True(ibaseIdx < baseEntityIdx);
+            Assert.True(baseEntityIdx < addressIdx);
+            Assert.True(addressIdx < companyIdx);
         }
 
         [Fact]
@@ -97,7 +124,7 @@ namespace CsToTs.Tests {
             };
             var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
 
-            Assert.Equal(4, Regex.Matches(gen, "export interface").Count);
+            Assert.Equal(5, Regex.Matches(gen, "export interface").Count);
 
             var baseEntity = GetGeneratedType(gen, "export interface BaseEntity");
             Assert.NotEmpty(baseEntity);
@@ -110,8 +137,14 @@ namespace CsToTs.Tests {
 
         [Fact]
         public void ShouldGenerateDateForDateTimes() {
-            var gen = Generator.GenerateTypeScript(typeof(Company<>), typeof(Address), typeof(TypeEnum));
-            //todo
+            var options = new TypeScriptOptions {
+                UseDateForDateTime = true
+            };
+            var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
+
+            var company = GetGeneratedType(gen, "export class Company");
+            Assert.NotEmpty(company);
+            Assert.Contains("CreateDate: Date", gen);
         }
 
         private static string GetGeneratedType(string generated, string declaration) {
