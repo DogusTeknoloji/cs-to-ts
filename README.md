@@ -10,3 +10,55 @@
 [![GitHub forks](https://img.shields.io/github/forks/DogusTeknoloji/cs-to-ts.svg?style=social&label=Fork)](https://github.com/DogusTeknoloji/cs-to-ts)
 
 From C# to TypeScript.
+
+```CSharp
+public class Company<TAddress>: BaseEntity<int> where TAddress: Address, new() {
+    public string Name { get; set; }
+    public int EmployeeCount { get; set; }
+    public decimal Income;
+    public IList<TAddress> Address { get; set; }
+}
+
+var typeScript = CsToTs.Generator.GenerateTypeScript(typeof(Company<>));
+
+```
+
+Generates below TypeScript;
+
+```TypeScript
+export interface IBase<T> {
+    Id: T;
+}
+    
+export abstract class BaseEntity<TKey> implements IBase<TKey> {
+    UpdateUser: string;
+    Type: TypeEnum;
+    Id: TKey;
+    CreateUser: string;
+    CreateDate: string;
+    UpdateDate: string;
+    IsActive: boolean;
+    InternalType: any;
+}
+    
+export class Address extends BaseEntity<number> implements IBase<number> {
+    PostalCode: number;
+    CompanyId: number;
+    City: string;
+    Detail: string;
+}
+    
+export class Company<TAddress extends Address & { new(): TAddress }> extends BaseEntity<number> implements IBase<number> {
+    Income: number;
+    Name: string;
+    EmployeeCount: number;
+    Address: Array<TAddress>;
+}
+
+export enum TypeEnum {
+    Type1 = 2,
+    Type2 = 5,
+}
+
+
+```
