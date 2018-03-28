@@ -9,7 +9,5 @@ namespace CsToTs {
         public bool UseDateForDateTime { get; set; }
         
         public bool UseInterfaceForClasses { get; set; }
-
-        public string Template { get; set; }
     }
 }

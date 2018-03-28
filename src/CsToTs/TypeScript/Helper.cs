@@ -21,13 +21,9 @@ namespace CsToTs.TypeScript {
             var context = new TypeScriptContext(options);
             GetTypeScriptDefinitions(types, context);
  
-            var template = options != null && !string.IsNullOrEmpty(options.Template)
-                ? options.Template
-                : Template;
-
             Handlebars.Configuration.TextEncoder = SimpleEncoder.Instance;
 
-            var generator = Handlebars.Compile(template);
+            var generator = Handlebars.Compile(Template);
             return generator(context);
         }
 
