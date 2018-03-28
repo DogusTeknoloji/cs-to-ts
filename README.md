@@ -48,7 +48,7 @@ export class Address extends BaseEntity<number> implements IBase<number> {
     Detail: string;
 }
     
-export class Company<TAddress extends Address & { new(): TAddress }> extends BaseEntity<number> implements IBase<number> {
+export class Company<TAddress extends Address & { new(): TAddress }> extends BaseEntity<number> {
     Income: number;
     Name: string;
     EmployeeCount: number;
