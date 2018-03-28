@@ -6,8 +6,8 @@
 [![GitHub issues](https://img.shields.io/github/issues/DogusTeknoloji/CsToTs.svg)](https://github.com/DogusTeknoloji/CsToTs/issues)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/DogusTeknoloji/CsToTs/master/LICENSE)
 
-[![GitHub stars](https://img.shields.io/github/stars/DogusTeknoloji/CsToTs.svg?style=social&label=Star)](https://github.com/DogusTeknoloji/CsToTs)
-[![GitHub forks](https://img.shields.io/github/forks/DogusTeknoloji/CsToTs.svg?style=social&label=Fork)](https://github.com/DogusTeknoloji/CsToTs)
+[![GitHub stars](https://img.shields.io/github/stars/DogusTeknoloji/cs-to-ts.svg?style=social&label=Star)](https://github.com/DogusTeknoloji/cs-to-ts)
+[![GitHub forks](https://img.shields.io/github/forks/DogusTeknoloji/cs-to-ts.svg?style=social&label=Fork)](https://github.com/DogusTeknoloji/cs-to-ts)
 
 From C# to TypeScript.
 
