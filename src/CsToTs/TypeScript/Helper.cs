@@ -56,7 +56,13 @@ namespace CsToTs.TypeScript {
 
             var isInterface = type.IsInterface || context.Options.UseInterfaceForClasses;
             var declaration = GetTypeName(type, context);
-            declaration = isInterface ? $"export interface {declaration}" : $"export class {declaration}";
+            if (isInterface) {
+                declaration = $"export interface {declaration}";
+            }
+            else {
+                var abs = type.IsAbstract ? " abstract" : string.Empty;
+                declaration = $"export{abs} class {declaration}";
+            }
             
             if (type.BaseType != null && type.BaseType != typeof(object)) {
                 if (isInterface) {
@@ -73,8 +79,10 @@ namespace CsToTs.TypeScript {
             context.Types.Add(typeDef);
 
             if (interfaces.Any()) {
-                declaration =
-                    $"{declaration} implements {string.Join(", ", interfaces.Select(i => GetTypeRef(i, context)))}";
+                var imp = isInterface ? "extends" : "implements";
+                var interfaceRefs = interfaces.Select(i => GetTypeRef(i, context));
+                var interfaceRefStr = string.Join(", ", interfaceRefs);
+                declaration = $"{declaration} {imp} {interfaceRefStr}";
             }
             
             typeDef.Declaration = declaration;
@@ -120,7 +128,9 @@ namespace CsToTs.TypeScript {
                     .Select(c => GetTypeRef(c, context))
                     .ToList();
 
-                if (g.IsClass && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
+                if (g.IsClass
+                    && !context.Options.UseInterfaceForClasses 
+                    && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
                     constraints.Add($"{{ new(): {g.Name} }}");
                 }
 
@@ -189,7 +199,8 @@ namespace CsToTs.TypeScript {
             }
         }
         
-        private static string StripGenericFromName(Type type) => type.Name.Substring(0, type.Name.IndexOf('`'));
+        private static string StripGenericFromName(Type type) 
+            => type.IsGenericType ? type.Name.Substring(0, type.Name.IndexOf('`')) : type.Name;
  
         private static string GetDefaultTemplate() {
             var ass = typeof(Generator).Assembly;
