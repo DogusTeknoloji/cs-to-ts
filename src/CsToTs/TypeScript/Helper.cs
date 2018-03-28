@@ -49,6 +49,10 @@ namespace CsToTs.TypeScript {
             if (existing != null) return existing;
 
             var interfaces = type.GetInterfaces().ToList();
+            interfaces = interfaces
+                .Except(type.BaseType?.GetInterfaces() ?? Enumerable.Empty<Type>())
+                .Except(interfaces.SelectMany(i => i.GetInterfaces()))
+                .ToList();
 
             var isInterface = type.IsInterface || context.Options.UseInterfaceForClasses;
             var declaration = GetTypeName(type, context);
