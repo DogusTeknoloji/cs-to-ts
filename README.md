@@ -59,6 +59,52 @@ export enum TypeEnum {
     Type1 = 2,
     Type2 = 5,
 }
+```
 
+You can generate interfaces for classes.
 
+```CSharp
+var options = new TypeScriptOptions {
+    UseInterfaceForClasses = true,
+};
+
+var typeScript = Generator.GenerateTypeScript(typeof(Company<>), options);
+```
+
+Generates below TypeScript;
+
+```TypeScript
+export interface IBase<T> {
+    Id: T;
+}
+    
+export interface BaseEntity<TKey> extends IBase<TKey> {
+    UpdateUser: string;
+    Type: TypeEnum;
+    Id: TKey;
+    CreateUser: string;
+    CreateDate: string;
+    UpdateDate: string;
+    IsActive: boolean;
+    InternalType: any;
+}
+    
+export interface Address extends BaseEntity<number> {
+    PostalCode: number;
+    CompanyId: number;
+    City: string;
+    Detail: string;
+}
+    
+export interface Company<TAddress extends Address> extends BaseEntity<number> {
+    Income: number;
+    Name: string;
+    EmployeeCount: number;
+    Address: Array<TAddress>;
+}
+
+export enum TypeEnum {
+    Type1 = 2,
+    Type2 = 5,
+}
 ```
