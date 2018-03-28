@@ -24,7 +24,7 @@ before_build:
 
 after_build:
 - dotnet pack src\CsToTs\CsToTs.csproj -c Release /p:Version=%appveyor_build_version%
-- appveyor PushArtifact CsToTs\bin\Release\CsToTs.%appveyor_build_version%.nupkg
+- appveyor PushArtifact src\CsToTs\bin\Release\CsToTs.%appveyor_build_version%.nupkg
 
 test_script:
 - dotnet test -c %CONFIGURATION% tests\CsToTs.Tests\CsToTs.Tests.csproj
