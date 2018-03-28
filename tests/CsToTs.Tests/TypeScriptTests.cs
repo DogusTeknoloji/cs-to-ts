@@ -85,7 +85,7 @@ namespace CsToTs.Tests {
 
             var constraints = Regex.Match(company, "<.*?>").Value;
             Assert.Contains("Address", constraints);
-            Assert.True(constraints.Contains("TAddress extends Address & { new(): TAddress }"));
+            Assert.Contains("TAddress extends Address & { new(): TAddress }", constraints);
         }
 
         [Fact]
