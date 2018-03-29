@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using CsToTs.TypeScript;
 
 namespace CsToTs {
     
@@ -10,5 +12,7 @@ namespace CsToTs {
         public Func<Type, bool> UseInterfaceForClasses { get; set; }
         public Func<Type, string> DefaultBaseType { get; set; }
         public Func<string, string> TypeRenamer { get; set; }
+        public Func<MethodInfo, MethodDefinition> CtorGenerator { get; set; }
+        public Func<MethodInfo, MethodDefinition> MethodGenerator { get; set; }
     }
 }
