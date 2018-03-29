@@ -147,6 +147,32 @@ namespace CsToTs.Tests {
             Assert.Contains("CreateDate: Date", gen);
         }
 
+        [Fact]
+        public void ShouldExtendDefaultBase() {
+            var options = new TypeScriptOptions {
+                DefaultBaseType = (_) => "Entity"
+            };
+            var gen = Generator.GenerateTypeScript(typeof(BaseEntity<>), options);
+
+            var baseEntity = GetGeneratedType(gen, "export abstract class BaseEntity");
+            Assert.NotEmpty(baseEntity);
+            Assert.Contains("extends Entity", gen);
+        }
+
+
+        [Fact]
+        public void ShouldImplementDefaultBase() {
+            var options = new TypeScriptOptions {
+                UseInterfaceForClasses = true,
+                DefaultBaseType = (_) => "Entity"
+            };
+            var gen = Generator.GenerateTypeScript(typeof(BaseEntity<>), options);
+
+            var baseEntity = GetGeneratedType(gen, "export interface BaseEntity");
+            Assert.NotEmpty(baseEntity);
+            Assert.Contains("extends Entity, IBase<TKey>", gen);
+        }
+
         private static string GetGeneratedType(string generated, string declaration) {
             var match = Regex.Match(generated, declaration + @".*?(export|$)", RegexOptions.Singleline);
 

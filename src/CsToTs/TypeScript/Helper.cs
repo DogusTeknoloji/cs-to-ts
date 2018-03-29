@@ -49,43 +49,49 @@ namespace CsToTs.TypeScript {
             if (existing != null) return existing;
 
             var interfaces = type.GetInterfaces().ToList();
-            interfaces = interfaces
+            var interfaceRefs = interfaces
                 .Except(type.BaseType?.GetInterfaces() ?? Enumerable.Empty<Type>())
                 .Except(interfaces.SelectMany(i => i.GetInterfaces()))
+                .Where(i => PopulateTypeDefinition(i, context) != null)
+                .Select(i => GetTypeRef(i, context))
                 .ToList();
 
             var isInterface = type.IsInterface || context.Options.UseInterfaceForClasses;
+            var baseTypeRef = string.Empty;
+            if (type.IsClass) {
+                if (type.BaseType != typeof(object) && PopulateTypeDefinition(type.BaseType, context) != null) {
+                    baseTypeRef = GetTypeRef(type.BaseType, context);
+                }
+                else if (context.Options.DefaultBaseType != null) {
+                    baseTypeRef = context.Options.DefaultBaseType(type);
+                }
+            }
+
             var declaration = GetTypeName(type, context);
             if (isInterface) {
                 declaration = $"export interface {declaration}";
+
+                if (!string.IsNullOrEmpty(baseTypeRef)) {
+                    interfaceRefs.Insert(0, baseTypeRef);
+                }
             }
             else {
                 var abs = type.IsAbstract ? " abstract" : string.Empty;
                 declaration = $"export{abs} class {declaration}";
-            }
-            
-            if (type.BaseType != null && type.BaseType != typeof(object)) {
-                if (isInterface) {
-                    interfaces.Insert(0, type.BaseType);
-                }
-                else if (PopulateTypeDefinition(type.BaseType, context) != null) {
-                    declaration = $"{declaration} extends {GetTypeRef(type.BaseType, context)}";
+
+                if (!string.IsNullOrEmpty(baseTypeRef)) {
+                    declaration = $"{declaration} extends {baseTypeRef}";
                 }
             }
-
-            interfaces = interfaces.Where(i => PopulateTypeDefinition(i, context) != null).ToList();
             
-            var typeDef = new TypeDefinition(type);
-            context.Types.Add(typeDef);
-
-            if (interfaces.Any()) {
+            if (interfaceRefs.Any()) {
                 var imp = isInterface ? "extends" : "implements";
-                var interfaceRefs = interfaces.Select(i => GetTypeRef(i, context));
                 var interfaceRefStr = string.Join(", ", interfaceRefs);
                 declaration = $"{declaration} {imp} {interfaceRefStr}";
             }
-            
-            typeDef.Declaration = declaration;
+
+            var typeDef = new TypeDefinition(type, declaration);
+            context.Types.Add(typeDef);
             typeDef.Members.AddRange(GetMembers(type, context));
 
             return typeDef;
