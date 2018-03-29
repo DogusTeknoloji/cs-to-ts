@@ -56,7 +56,8 @@ namespace CsToTs.TypeScript {
                 .Select(i => GetTypeRef(i, context))
                 .ToList();
 
-            var isInterface = type.IsInterface || context.Options.UseInterfaceForClasses;
+            var useInterface = context.Options.UseInterfaceForClasses;
+            var isInterface = type.IsInterface || (useInterface != null && useInterface(type));
             var baseTypeRef = string.Empty;
             if (type.IsClass) {
                 if (type.BaseType != typeof(object) && PopulateTypeDefinition(type.BaseType, context) != null) {
@@ -134,8 +135,9 @@ namespace CsToTs.TypeScript {
                     .Select(c => GetTypeRef(c, context))
                     .ToList();
 
+                var useInterface = context.Options.UseInterfaceForClasses;
                 if (g.IsClass
-                    && !context.Options.UseInterfaceForClasses 
+                    && (useInterface == null || !useInterface(type))
                     && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
                     constraints.Add($"{{ new(): {g.Name} }}");
                 }

@@ -120,7 +120,7 @@ namespace CsToTs.Tests {
         [Fact]
         public void ShouldGenerateInterfaceForClasses() {
             var options = new TypeScriptOptions {
-                UseInterfaceForClasses = true
+                UseInterfaceForClasses = _ => true
             };
             var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
 
@@ -163,7 +163,7 @@ namespace CsToTs.Tests {
         [Fact]
         public void ShouldImplementDefaultBase() {
             var options = new TypeScriptOptions {
-                UseInterfaceForClasses = true,
+                UseInterfaceForClasses = _ => true,
                 DefaultBaseType = (_) => "Entity"
             };
             var gen = Generator.GenerateTypeScript(typeof(BaseEntity<>), options);
