@@ -173,6 +173,19 @@ namespace CsToTs.Tests {
             Assert.Contains("extends Entity, IBase<TKey>", gen);
         }
 
+        [Fact]
+        public void ShouldRenameTypes() {
+            var options = new TypeScriptOptions {
+                TypeRenamer = t => t == "BaseEntity" ? "EntityBase" : t 
+            };
+            var gen = Generator.GenerateTypeScript(typeof(BaseEntity<>), options);
+
+            var baseEntity = GetGeneratedType(gen, "export abstract class EntityBase");
+            Assert.NotEmpty(baseEntity);
+
+            Assert.DoesNotContain("BaseEntity", gen);
+        }
+
         private static string GetGeneratedType(string generated, string declaration) {
             var match = Regex.Match(generated, declaration + @".*?(export|$)", RegexOptions.Singleline);
 

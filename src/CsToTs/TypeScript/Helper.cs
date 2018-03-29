@@ -104,7 +104,7 @@ namespace CsToTs.TypeScript {
             var members = Enum.GetNames(type)
                 .Select(n => new EnumField(n, Convert.ToInt32(Enum.Parse(type, n)).ToString()));
 
-            var def = new EnumDefinition(type, type.Name, members);
+            var def = new EnumDefinition(type, ApplyRename(type.Name, context.Options), members);
             context.Enums.Add(def);
             
             return def;
@@ -126,7 +126,7 @@ namespace CsToTs.TypeScript {
         }
 
         private static string GetTypeName(Type type, TypeScriptContext context) {
-            if (!type.IsGenericType) return type.Name;
+            if (!type.IsGenericType) return ApplyRename(type.Name, context.Options);
 
             var genericPrms = type.GetGenericArguments().Select(g => {
                 var constraints = g.GetGenericParameterConstraints()
@@ -147,16 +147,16 @@ namespace CsToTs.TypeScript {
                 return g.Name;
             });
 
-            return $"{StripGenericFromName(type)}<{string.Join(", ", genericPrms)}>";
+            return $"{ApplyRename(StripGenericFromName(type), context.Options)}<{string.Join(", ", genericPrms)}>";
         }
 
         private static string GetTypeRef(Type type, TypeScriptContext context) {
             if (type.IsGenericParameter)
-                return type.Name;
+                return ApplyRename(type.Name, context.Options);
 
             if (type.IsEnum) {
                 var enumDef = PopulateEnumDefinition(type, context);
-                return enumDef != null ? type.Name : "any";
+                return enumDef != null ? ApplyRename(type.Name, context.Options) : "any";
             }
 
             var typeCode = Type.GetTypeCode(type);
@@ -170,7 +170,7 @@ namespace CsToTs.TypeScript {
             if (typeDef == null) 
                 return "any";
 
-            var typeName = StripGenericFromName(type);
+            var typeName = ApplyRename(StripGenericFromName(type), context.Options);
             if (type.IsGenericType) {
                 var genericPrms = type.GetGenericArguments().Select(t => GetTypeRef(t, context));
                 return $"{typeName}<{string.Join(", ", genericPrms)}>";
@@ -207,6 +207,9 @@ namespace CsToTs.TypeScript {
         
         private static string StripGenericFromName(Type type) 
             => type.IsGenericType ? type.Name.Substring(0, type.Name.IndexOf('`')) : type.Name;
+
+        private static string ApplyRename(string typeName, TypeScriptOptions options)
+            => options.TypeRenamer != null ? options.TypeRenamer(typeName) : typeName;
  
         private static string GetDefaultTemplate() {
             var ass = typeof(Generator).Assembly;

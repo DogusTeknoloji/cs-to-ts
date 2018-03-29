@@ -9,5 +9,6 @@ namespace CsToTs {
         public bool UseDateForDateTime { get; set; }
         public bool UseInterfaceForClasses { get; set; }
         public Func<Type, string> DefaultBaseType { get; set; }
+        public Func<string, string> TypeRenamer { get; set; }
     }
 }
