@@ -178,7 +178,7 @@ namespace CsToTs.Tests {
             var options = new TypeScriptOptions {
                 TypeRenamer = t => t == "BaseEntity" ? "EntityBase" : t 
             };
-            var gen = Generator.GenerateTypeScript(typeof(BaseEntity<>), options);
+            var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
 
             var baseEntity = GetGeneratedType(gen, "export abstract class EntityBase");
             Assert.NotEmpty(baseEntity);
