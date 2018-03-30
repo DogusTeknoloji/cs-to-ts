@@ -11,6 +11,7 @@ using HandlebarsDotNet;
 namespace CsToTs.TypeScript {
 
     public static class Helper {
+        private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         private static readonly Lazy<string> _lazyTemplate = new Lazy<string>(GetDefaultTemplate);
         private static string Template => _lazyTemplate.Value;
 
@@ -39,9 +40,14 @@ namespace CsToTs.TypeScript {
         }
 
         private static TypeDefinition PopulateTypeDefinition(Type type, TypeScriptContext context) {
+            if (type.IsGenericParameter) return null;
+            var typeCode = Type.GetTypeCode(type);
+            if (typeCode != TypeCode.Object) return null;
             if (SkipCheck(type.ToString(), context.Options)) return null;
 
             if (type.IsConstructedGenericType) {
+                type.GetGenericArguments().ToList().ForEach(t => PopulateTypeDefinition(t, context));
+                
                 type = type.GetGenericTypeDefinition();
             }
 
@@ -51,7 +57,7 @@ namespace CsToTs.TypeScript {
             var interfaces = type.GetInterfaces().ToList();
             var interfaceRefs = interfaces
                 .Except(type.BaseType?.GetInterfaces() ?? Enumerable.Empty<Type>())
-                .Except(interfaces.SelectMany(i => i.GetInterfaces()))
+                .Except(interfaces.SelectMany(i => i.GetInterfaces())) // get only implemented by this type
                 .Where(i => PopulateTypeDefinition(i, context) != null)
                 .Select(i => GetTypeRef(i, context))
                 .ToList();
@@ -94,6 +100,7 @@ namespace CsToTs.TypeScript {
             var typeDef = new TypeDefinition(type, declaration);
             context.Types.Add(typeDef);
             typeDef.Members.AddRange(GetMembers(type, context));
+            typeDef.Methods.AddRange(GetMethods(type, context));
 
             return typeDef;
         }
@@ -112,18 +119,45 @@ namespace CsToTs.TypeScript {
         }
         
         private static IEnumerable<MemberDefinition> GetMembers(Type type, TypeScriptContext context) {
-            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-
-            var memberDefs = type.GetFields(bindingFlags)
+            var memberDefs = type.GetFields(BindingFlags)
                 .Select(f => new MemberDefinition(f.Name, GetTypeRef(f.FieldType, context)))
                 .ToList();
 
             memberDefs.AddRange(
-                type.GetProperties(bindingFlags)
+                type.GetProperties(BindingFlags)
                     .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.PropertyType, context)))
             );
             
             return memberDefs;
+        }
+
+        private static IEnumerable<MethodDefinition> GetMethods(Type type, TypeScriptContext context) {
+            var shouldGenerateMethod = context.Options.ShouldGenerateMethod;
+            if (shouldGenerateMethod == null) return Enumerable.Empty<MethodDefinition>();
+
+            var retVal = new List<MethodDefinition>();
+            var methods = type.GetMethods(BindingFlags).Where(m => !m.IsSpecialName);
+            foreach (var method in methods) {
+                string methodDeclaration;
+                if (method.IsGenericMethod) {
+                    var methodName = StripGenericFromName(method.Name);
+                    var genericPrms = method.GetGenericArguments().Select(t => GetTypeRef(t, context));
+                    methodDeclaration = $"{methodName}<{string.Join(", ", genericPrms)}>";
+                }
+                else {
+                    methodDeclaration = method.Name;
+                }
+
+                var parameters = method.GetParameters()
+                    .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.ParameterType, context)));
+                var methodDefinition = new MethodDefinition(methodDeclaration, parameters);
+
+                if (shouldGenerateMethod(method, methodDefinition)) {
+                    retVal.Add(methodDefinition);
+                }
+            }
+
+            return retVal;
         }
 
         private static string GetTypeName(Type type, TypeScriptContext context) {
@@ -149,7 +183,9 @@ namespace CsToTs.TypeScript {
                 return g.Name;
             });
 
-            return $"{ApplyRename(StripGenericFromName(type), context.Options)}<{string.Join(", ", genericPrms)}>";
+            var typeName = ApplyRename(StripGenericFromName(type.Name), context.Options);
+            var genericPrmStr = string.Join(", ", genericPrms);
+            return $"{typeName}<{genericPrmStr}>";
         }
 
         private static string GetTypeRef(Type type, TypeScriptContext context) {
@@ -172,13 +208,14 @@ namespace CsToTs.TypeScript {
             if (typeDef == null) 
                 return "any";
 
-            var typeName = ApplyRename(StripGenericFromName(type), context.Options);
+            var typeName = type.Name;
             if (type.IsGenericType) {
+                typeName = ApplyRename(StripGenericFromName(typeName), context.Options);
                 var genericPrms = type.GetGenericArguments().Select(t => GetTypeRef(t, context));
                 return $"{typeName}<{string.Join(", ", genericPrms)}>";
             }
 
-            return typeName;
+            return ApplyRename(typeName, context.Options);
         }
         
         private static string GetPrimitiveMemberType(TypeCode typeCode, TypeScriptOptions options) {
@@ -207,8 +244,7 @@ namespace CsToTs.TypeScript {
             }
         }
         
-        private static string StripGenericFromName(Type type) 
-            => type.IsGenericType ? type.Name.Substring(0, type.Name.IndexOf('`')) : type.Name;
+        private static string StripGenericFromName(string name) => name.Substring(0, name.IndexOf('`'));
 
         private static string ApplyRename(string typeName, TypeScriptOptions options)
             => options.TypeRenamer != null ? options.TypeRenamer(typeName) : typeName;

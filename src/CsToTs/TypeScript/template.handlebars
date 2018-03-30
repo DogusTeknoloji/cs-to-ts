@@ -4,6 +4,14 @@
     {{#Members}}
     {{Name}}: {{Type}};
     {{/Members}}
+    {{#Methods}}
+    
+    {{Declaration}}({{ParameterStr}}) {
+        {{#Lines}}
+        {{this}}
+        {{/Lines}}
+    }
+    {{/Methods}}
 }
 {{/Types}}
 {{#Enums}}

@@ -80,7 +80,7 @@ namespace CsToTs.Tests {
             var company = GetGeneratedType(gen, "export class Company");
             Assert.NotEmpty(company);
             Assert.Contains("Income: number", gen);
-            Assert.Contains("Address: Array<TAddress>", company);
+            Assert.Contains("Addresses: Array<TAddress>", company);
             Assert.Contains("extends BaseEntity<number>", company);
 
             var constraints = Regex.Match(company, "<.*?>").Value;
@@ -164,7 +164,7 @@ namespace CsToTs.Tests {
         public void ShouldImplementDefaultBase() {
             var options = new TypeScriptOptions {
                 UseInterfaceForClasses = _ => true,
-                DefaultBaseType = (_) => "Entity"
+                DefaultBaseType = _ => "Entity"
             };
             var gen = Generator.GenerateTypeScript(typeof(BaseEntity<>), options);
 
@@ -184,6 +184,25 @@ namespace CsToTs.Tests {
             Assert.NotEmpty(baseEntity);
 
             Assert.DoesNotContain("BaseEntity", gen);
+        }
+
+        [Fact]
+        public void ShouldGenerateMethods() {
+            var options = new TypeScriptOptions {
+                ShouldGenerateMethod = (m, md) => {
+                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions"));
+                    md.Lines.Add($"return window.ajax('{m.Name}')");
+                    return true;
+                }
+            };
+
+            var gen = Generator.GenerateTypeScript(typeof(TestApi<Company<Address>>), options);
+
+            var testApi = GetGeneratedType(gen, "export class TestApi");
+            Assert.NotEmpty(testApi);
+            Assert.Contains("Get(options: AjaxOptions)", testApi);
+            Assert.Contains("return window.ajax('Get')", testApi);
+            Assert.Equal(3, Regex.Matches(testApi, "(options: AjaxOptions)").Count);
         }
 
         private static string GetGeneratedType(string generated, string declaration) {

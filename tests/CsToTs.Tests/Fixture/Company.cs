@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace CsToTs.Tests.Fixture {
     
@@ -6,6 +7,6 @@ namespace CsToTs.Tests.Fixture {
         public string Name { get; set; }
         public int EmployeeCount { get; set; }
         public decimal Income;
-        public IList<TAddress> Address { get; set; }
+        public IList<TAddress> Addresses { get; set; }
     }
 }

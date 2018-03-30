@@ -1,17 +1,22 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CsToTs.TypeScript {
 
     public class MethodDefinition {
 
-        public MethodDefinition(string declaration, IDictionary<string, string> parameters, IEnumerable<string> lines) {
+        public MethodDefinition(string declaration, IEnumerable<MemberDefinition> parameters = null, 
+                                List<string> lines = null) {
             Declaration = declaration;
-            Parameters = parameters;
-            Lines = lines;
+            Parameters = parameters == null ? new List<MemberDefinition>() : parameters.ToList();
+            Lines = lines == null ? new List<string>() : lines.ToList();
         }
 
         public string Declaration { get; }
-        public IDictionary<string, string> Parameters { get; }
-        public IEnumerable<string> Lines { get; }
+        public List<MemberDefinition> Parameters { get; }
+        public List<string> Lines { get; }
+
+        public string ParameterStr 
+            => string.Join(", ", Parameters.Select(m => $"{m.Name}: {m.Type}"));
     }
 }
