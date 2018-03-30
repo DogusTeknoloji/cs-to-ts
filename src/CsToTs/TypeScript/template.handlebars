@@ -4,6 +4,14 @@
     {{#Members}}
     {{Name}}: {{Type}};
     {{/Members}}
+    {{#if Ctor}}
+
+    constructor({{Ctor.Parameters}}) {
+        {{#Ctor.Lines}}
+        {{this}}
+        {{/Ctor.Lines}}
+    }
+    {{/if}}
     {{#Methods}}
     
     {{Declaration}}({{ParameterStr}}) {

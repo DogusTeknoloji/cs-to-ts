@@ -47,20 +47,13 @@ namespace CsToTs.TypeScript {
 
             if (type.IsConstructedGenericType) {
                 type.GetGenericArguments().ToList().ForEach(t => PopulateTypeDefinition(t, context));
-                
                 type = type.GetGenericTypeDefinition();
             }
 
             var existing = context.Types.FirstOrDefault(t => t.ClrType == type);
             if (existing != null) return existing;
 
-            var interfaces = type.GetInterfaces().ToList();
-            var interfaceRefs = interfaces
-                .Except(type.BaseType?.GetInterfaces() ?? Enumerable.Empty<Type>())
-                .Except(interfaces.SelectMany(i => i.GetInterfaces())) // get only implemented by this type
-                .Where(i => PopulateTypeDefinition(i, context) != null)
-                .Select(i => GetTypeRef(i, context))
-                .ToList();
+            var interfaceRefs = GetInterfaces(type, context);
 
             var useInterface = context.Options.UseInterfaceForClasses;
             var isInterface = type.IsInterface || (useInterface != null && useInterface(type));
@@ -75,6 +68,7 @@ namespace CsToTs.TypeScript {
             }
 
             var declaration = GetTypeName(type, context);
+            CtorDefinition ctor = null;
             if (isInterface) {
                 declaration = $"export interface {declaration}";
 
@@ -89,6 +83,14 @@ namespace CsToTs.TypeScript {
                 if (!string.IsNullOrEmpty(baseTypeRef)) {
                     declaration = $"{declaration} extends {baseTypeRef}";
                 }
+
+                var ctorGenerator = context.Options.CtorGenerator;
+                if (ctorGenerator != null) {
+                    var (lines, parameters) = ctorGenerator(type);
+                    if (lines != null && lines.Any()) {
+                        ctor = new CtorDefinition(lines, parameters);
+                    }
+                }
             }
             
             if (interfaceRefs.Any()) {
@@ -97,12 +99,22 @@ namespace CsToTs.TypeScript {
                 declaration = $"{declaration} {imp} {interfaceRefStr}";
             }
 
-            var typeDef = new TypeDefinition(type, declaration);
+            var typeDef = new TypeDefinition(type, declaration, ctor);
             context.Types.Add(typeDef);
             typeDef.Members.AddRange(GetMembers(type, context));
             typeDef.Methods.AddRange(GetMethods(type, context));
 
             return typeDef;
+        }
+
+        private static List<string> GetInterfaces(Type type, TypeScriptContext context) {
+            var interfaces = type.GetInterfaces().ToList();
+            return interfaces
+                .Except(type.BaseType?.GetInterfaces() ?? Enumerable.Empty<Type>())
+                .Except(interfaces.SelectMany(i => i.GetInterfaces())) // get only implemented by this type
+                .Where(i => PopulateTypeDefinition(i, context) != null)
+                .Select(i => GetTypeRef(i, context))
+                .ToList();
         }
 
         private static EnumDefinition PopulateEnumDefinition(Type type, TypeScriptContext context) {

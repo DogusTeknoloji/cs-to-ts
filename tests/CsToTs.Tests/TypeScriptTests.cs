@@ -187,6 +187,24 @@ namespace CsToTs.Tests {
         }
 
         [Fact]
+        public void ShouldGenerateCtor() {
+            var options = new TypeScriptOptions {
+                CtorGenerator = m => {
+                    var parameters = "typeName: string";
+                    var lines = new[] { "super(typeName);" };
+                    return(lines, parameters);
+                }
+            };
+
+            var gen = Generator.GenerateTypeScript(typeof(TestApi<Company<Address>>), options);
+
+            var testApi = GetGeneratedType(gen, "export class TestApi");
+            Assert.NotEmpty(testApi);
+            Assert.Contains("constructor(typeName: string)", testApi);
+            Assert.Contains("super(typeName);", testApi);
+        }
+
+        [Fact]
         public void ShouldGenerateMethods() {
             var options = new TypeScriptOptions {
                 ShouldGenerateMethod = (m, md) => {
