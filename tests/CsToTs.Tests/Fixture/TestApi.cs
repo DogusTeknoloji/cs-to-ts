@@ -15,5 +15,9 @@ namespace CsToTs.Tests.Fixture {
         public IEnumerable<T> List() {
             return Enumerable.Empty<T>();
         }
+
+        public IEnumerable<TItem> Query<TItem>() {
+            return Enumerable.Empty<TItem>();
+        }
     }
 }

@@ -152,7 +152,7 @@ namespace CsToTs.TypeScript {
             foreach (var method in methods) {
                 string methodDeclaration;
                 if (method.IsGenericMethod) {
-                    var methodName = StripGenericFromName(method.Name);
+                    var methodName = method.Name;
                     var genericPrms = method.GetGenericArguments().Select(t => GetTypeRef(t, context));
                     methodDeclaration = $"{methodName}<{string.Join(", ", genericPrms)}>";
                 }

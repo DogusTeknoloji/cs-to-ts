@@ -220,7 +220,8 @@ namespace CsToTs.Tests {
             Assert.NotEmpty(testApi);
             Assert.Contains("Get(options: AjaxOptions)", testApi);
             Assert.Contains("return window.ajax('Get')", testApi);
-            Assert.Equal(3, Regex.Matches(testApi, "(options: AjaxOptions)").Count);
+            Assert.Contains("Query<TItem>(", testApi);
+            Assert.Equal(4, Regex.Matches(testApi, "(options: AjaxOptions)").Count);
         }
 
         private static string GetGeneratedType(string generated, string declaration) {
