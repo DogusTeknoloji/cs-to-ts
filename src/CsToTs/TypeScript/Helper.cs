@@ -15,7 +15,7 @@ namespace CsToTs.TypeScript {
         private static readonly Lazy<string> _lazyTemplate = new Lazy<string>(GetDefaultTemplate);
         private static string Template => _lazyTemplate.Value;
 
-        private static bool SkipCheck(string s, ReflectOptions o) =>
+        private static bool SkipCheck(string s, TypeScriptOptions o) =>
             s != null && o.SkipTypePatterns.Any(p => Regex.Match(s, p).Success);
 
         internal static string GenerateTypeScript(IEnumerable<Type> types, TypeScriptOptions options) {
@@ -86,10 +86,7 @@ namespace CsToTs.TypeScript {
 
                 var ctorGenerator = context.Options.CtorGenerator;
                 if (ctorGenerator != null) {
-                    var (lines, parameters) = ctorGenerator(type);
-                    if (lines != null && lines.Any()) {
-                        ctor = new CtorDefinition(lines, parameters);
-                    }
+                    ctor = ctorGenerator(type);
                 }
             }
             

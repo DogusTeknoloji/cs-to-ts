@@ -192,7 +192,7 @@ namespace CsToTs.Tests {
                 CtorGenerator = m => {
                     var parameters = "typeName: string";
                     var lines = new[] { "super(typeName);" };
-                    return(lines, parameters);
+                    return new TypeScript.CtorDefinition(lines, parameters);
                 }
             };
 
