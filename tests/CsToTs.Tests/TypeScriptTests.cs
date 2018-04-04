@@ -224,6 +224,28 @@ namespace CsToTs.Tests {
             Assert.Equal(4, Regex.Matches(testApi, "(options: AjaxOptions)").Count);
         }
 
+        [Fact]
+        public void ShouldRenameRecurringTypeNames() {
+            var gen = Generator.GenerateTypeScript(typeof(IBase), typeof(IBase<,>));
+
+            var ibase = GetGeneratedType(gen, "export interface IBase<T>");
+            Assert.NotEmpty(ibase);
+            Assert.Contains("Id: T", ibase);
+
+            var ibase1 = GetGeneratedType(gen, @"export interface IBase\$1 extends IBase<number>");
+            Assert.NotEmpty(ibase1);
+            Assert.Contains("Name: string", ibase1);
+
+            var ibase2 = GetGeneratedType(gen, @"export interface IBase\$2<T, U>");
+            Assert.NotEmpty(ibase1);
+            Assert.Contains("Id: T", ibase2);
+            Assert.Contains("Name: U", ibase2);
+            Assert.Contains("Base1: IBase<T>", ibase2);
+            Assert.Contains("Base2: IBase$1", ibase2);
+
+            Assert.Equal(3, GetTypeCount(gen));
+        }
+
         private static string GetGeneratedType(string generated, string declaration) {
             var match = Regex.Match(generated, declaration + @".*?(export|$)", RegexOptions.Singleline);
 

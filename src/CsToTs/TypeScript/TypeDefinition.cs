@@ -6,8 +6,9 @@ namespace CsToTs.TypeScript {
     
     public class TypeDefinition {
 
-        public TypeDefinition(Type clrType, string declaration, CtorDefinition ctor = null) {
+        public TypeDefinition(Type clrType, string name, string declaration, CtorDefinition ctor = null) {
             ClrType = clrType;
+            Name = name;
             Declaration = declaration;
             Ctor = ctor;
             Members = new List<MemberDefinition>();
@@ -15,6 +16,7 @@ namespace CsToTs.TypeScript {
         }
         
         public Type ClrType { get; }
+        public string Name { get; } 
         public string Declaration { get; }
         public CtorDefinition Ctor { get; }
         public List<MemberDefinition> Members { get; }

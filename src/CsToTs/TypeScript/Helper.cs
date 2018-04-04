@@ -55,7 +55,7 @@ namespace CsToTs.TypeScript {
 
             var interfaceRefs = GetInterfaces(type, context);
 
-            var useInterface = context.Options.UseInterfaceForClasses;
+            var useInterface = context.Options.UseInterfaceForClasses; 
             var isInterface = type.IsInterface || (useInterface != null && useInterface(type));
             var baseTypeRef = string.Empty;
             if (type.IsClass) {
@@ -67,7 +67,35 @@ namespace CsToTs.TypeScript {
                 }
             }
 
-            var declaration = GetTypeName(type, context);
+            string declaration, typeName;
+            if (!type.IsGenericType) {
+                typeName = declaration = ApplyRename(type.Name, context);
+            }
+            else {
+                var genericPrms = type.GetGenericArguments().Select(g => {
+                    var constraints = g.GetGenericParameterConstraints()
+                        .Where(c => PopulateTypeDefinition(c, context) != null)
+                        .Select(c => GetTypeRef(c, context))
+                        .ToList();
+
+                    if (g.IsClass
+                        && (useInterface == null || !useInterface(type))
+                        && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
+                        constraints.Add($"{{ new(): {g.Name} }}");
+                    }
+
+                    if (constraints.Any()) {
+                        return $"{g.Name} extends {string.Join(" & ", constraints)}";
+                    }
+
+                    return g.Name;
+                });
+
+                typeName = ApplyRename(StripGenericFromName(type.Name), context);
+                var genericPrmStr = string.Join(", ", genericPrms);
+                declaration = $"{typeName}<{genericPrmStr}>";
+            }
+
             CtorDefinition ctor = null;
             if (isInterface) {
                 declaration = $"export interface {declaration}";
@@ -96,7 +124,7 @@ namespace CsToTs.TypeScript {
                 declaration = $"{declaration} {imp} {interfaceRefStr}";
             }
 
-            var typeDef = new TypeDefinition(type, declaration, ctor);
+            var typeDef = new TypeDefinition(type, typeName, declaration, ctor);
             context.Types.Add(typeDef);
             typeDef.Members.AddRange(GetMembers(type, context));
             typeDef.Methods.AddRange(GetMethods(type, context));
@@ -121,7 +149,7 @@ namespace CsToTs.TypeScript {
             var members = Enum.GetNames(type)
                 .Select(n => new EnumField(n, Convert.ToInt32(Enum.Parse(type, n)).ToString()));
 
-            var def = new EnumDefinition(type, ApplyRename(type.Name, context.Options), members);
+            var def = new EnumDefinition(type, ApplyRename(type.Name, context), members);
             context.Enums.Add(def);
             
             return def;
@@ -169,41 +197,13 @@ namespace CsToTs.TypeScript {
             return retVal;
         }
 
-        private static string GetTypeName(Type type, TypeScriptContext context) {
-            if (!type.IsGenericType) return ApplyRename(type.Name, context.Options);
-
-            var genericPrms = type.GetGenericArguments().Select(g => {
-                var constraints = g.GetGenericParameterConstraints()
-                    .Where(c => PopulateTypeDefinition(c, context) != null)
-                    .Select(c => GetTypeRef(c, context))
-                    .ToList();
-
-                var useInterface = context.Options.UseInterfaceForClasses;
-                if (g.IsClass
-                    && (useInterface == null || !useInterface(type))
-                    && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
-                    constraints.Add($"{{ new(): {g.Name} }}");
-                }
-
-                if (constraints.Any()) {
-                    return $"{g.Name} extends {string.Join(" & ", constraints)}";
-                }
-
-                return g.Name;
-            });
-
-            var typeName = ApplyRename(StripGenericFromName(type.Name), context.Options);
-            var genericPrmStr = string.Join(", ", genericPrms);
-            return $"{typeName}<{genericPrmStr}>";
-        }
-
         private static string GetTypeRef(Type type, TypeScriptContext context) {
             if (type.IsGenericParameter)
-                return ApplyRename(type.Name, context.Options);
+                return type.Name;
 
             if (type.IsEnum) {
                 var enumDef = PopulateEnumDefinition(type, context);
-                return enumDef != null ? ApplyRename(type.Name, context.Options) : "any";
+                return enumDef != null ? enumDef.Name : "any";
             }
 
             var typeCode = Type.GetTypeCode(type);
@@ -217,14 +217,13 @@ namespace CsToTs.TypeScript {
             if (typeDef == null) 
                 return "any";
 
-            var typeName = type.Name;
+            var typeName = typeDef.Name;
             if (type.IsGenericType) {
-                typeName = ApplyRename(StripGenericFromName(typeName), context.Options);
                 var genericPrms = type.GetGenericArguments().Select(t => GetTypeRef(t, context));
                 return $"{typeName}<{string.Join(", ", genericPrms)}>";
             }
 
-            return ApplyRename(typeName, context.Options);
+            return typeName;
         }
         
         private static string GetPrimitiveMemberType(TypeCode typeCode, TypeScriptOptions options) {
@@ -255,8 +254,18 @@ namespace CsToTs.TypeScript {
         
         private static string StripGenericFromName(string name) => name.Substring(0, name.IndexOf('`'));
 
-        private static string ApplyRename(string typeName, TypeScriptOptions options)
-            => options.TypeRenamer != null ? options.TypeRenamer(typeName) : typeName;
+        private static string ApplyRename(string typeName, TypeScriptContext context) {
+            var options = context.Options;
+            typeName = options.TypeRenamer != null ? options.TypeRenamer(typeName) : typeName;
+
+            var checkName = typeName;
+            var i = 1;
+            while (context.Types.Any(td => td.Name == checkName)) {
+                checkName = $"{typeName}${i++}";
+            }
+            
+            return checkName;
+        }
  
         private static string GetDefaultTemplate() {
             var ass = typeof(Generator).Assembly;
