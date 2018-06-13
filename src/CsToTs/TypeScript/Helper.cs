@@ -209,9 +209,11 @@ namespace CsToTs.TypeScript {
             var typeCode = Type.GetTypeCode(type);
             if (typeCode != TypeCode.Object) 
                 return GetPrimitiveMemberType(typeCode, context.Options);
-            
-            if (typeof(IEnumerable).IsAssignableFrom(type))
-                return $"Array<{GetTypeRef(type.GetGenericArguments().First(), context)}>";
+
+            var enumerable = type.GetInterfaces()
+                .FirstOrDefault(i => i.IsConstructedGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            if (enumerable != null)
+                return $"Array<{GetTypeRef(enumerable.GetGenericArguments().First(), context)}>";
                 
             var typeDef = PopulateTypeDefinition(type, context);
             if (typeDef == null) 

@@ -8,5 +8,6 @@ namespace CsToTs.Tests.Fixture {
         public int EmployeeCount { get; set; }
         public decimal Income;
         public IList<TAddress> Addresses { get; set; }
+        public TAddress[] AddressesArray { get; set; }
     }
 }

@@ -81,6 +81,7 @@ namespace CsToTs.Tests {
             Assert.NotEmpty(company);
             Assert.Contains("Income: number", gen);
             Assert.Contains("Addresses: Array<TAddress>", company);
+            Assert.Contains("AddressesArray: Array<TAddress>", company);
             Assert.Contains("extends BaseEntity<number>", company);
 
             var constraints = Regex.Match(company, "<.*?>").Value;
