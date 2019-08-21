@@ -25,7 +25,7 @@ namespace CsToTs {
         public Func<Type, bool> UseInterfaceForClasses { get; set; }
         public Func<Type, string> DefaultBaseType { get; set; }
         public Func<string, string> TypeRenamer { get; set; }
-        public Func<string, string> MemberRenamer { get; set; }
+        public Func<MemberInfo, string> MemberRenamer { get; set; }
         public Func<Type, CtorDefinition> CtorGenerator { get; set; }
         public Func<MethodInfo, MethodDefinition, bool> ShouldGenerateMethod { get; set; }
     }

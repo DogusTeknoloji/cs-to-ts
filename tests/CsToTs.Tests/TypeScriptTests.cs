@@ -178,7 +178,7 @@ namespace CsToTs.Tests {
         public void ShouldRenameTypes() {
             var options = new TypeScriptOptions {
                 // convert to camel case
-                MemberRenamer = source => source.Substring(0, 1).ToLower() + source.Substring(1)
+                MemberRenamer = source => source.Name.Substring(0, 1).ToLower() + source.Name.Substring(1)
             };
             var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
 
