@@ -177,6 +177,33 @@ namespace CsToTs.Tests {
         [Fact]
         public void ShouldRenameTypes() {
             var options = new TypeScriptOptions {
+                // convert to camel case
+                MemberRenamer = source => source.Name.Substring(0, 1).ToLower() + source.Name.Substring(1)
+            };
+            var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
+
+            var address = GetGeneratedType(gen, "export class Address");
+            Assert.NotEmpty(address);
+            Assert.Contains("companyId: number", address);
+            Assert.Contains("city: string", address);
+            Assert.Contains("detail: string", address);
+            Assert.Contains("postalCode: number", address);
+
+            var company = GetGeneratedType(gen, "export class Company");
+            Assert.NotEmpty(company);
+            Assert.Contains("income: number", gen);
+            Assert.Contains("addresses: Array<TAddress>", company);
+            Assert.Contains("addressesArray: Array<TAddress>", company);
+            Assert.Contains("extends BaseEntity<number>", company);
+
+            var constraints = Regex.Match(company, "<.*?>").Value;
+            Assert.Contains("Address", constraints);
+            Assert.Contains("TAddress extends Address & { new(): TAddress }", constraints);
+        }
+
+        [Fact]
+        public void ShouldRenameMembers() {
+            var options = new TypeScriptOptions {
                 TypeRenamer = t => t == "BaseEntity" ? "EntityBase" : t 
             };
             var gen = Generator.GenerateTypeScript(typeof(Company<>), options);
