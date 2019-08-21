@@ -156,19 +156,21 @@ namespace CsToTs.TypeScript {
         }
         
         private static IEnumerable<MemberDefinition> GetMembers(Type type, TypeScriptContext context) {
+            var useDecorators = context.Options.UseDecorators ?? new Func<MemberInfo, IEnumerable<string>>(_=> (new List<string>()));
             var memberDefs = type.GetFields(BindingFlags)
-                .Select(f => new MemberDefinition(f.Name, GetTypeRef(f.FieldType, context)))
+                .Select(f => new MemberDefinition(f.Name, GetTypeRef(f.FieldType, context), useDecorators(f).ToList()))
                 .ToList();
 
             memberDefs.AddRange(
                 type.GetProperties(BindingFlags)
-                    .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.PropertyType, context)))
+                    .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.PropertyType, context), useDecorators(p).ToList()))
             );
             
             return memberDefs;
         }
 
         private static IEnumerable<MethodDefinition> GetMethods(Type type, TypeScriptContext context) {
+            var useDecorators = context.Options.UseDecorators ?? new Func<MemberInfo, IEnumerable<string>>(_=> (new List<string>()));
             var shouldGenerateMethod = context.Options.ShouldGenerateMethod;
             if (shouldGenerateMethod == null) return Enumerable.Empty<MethodDefinition>();
 
@@ -187,7 +189,7 @@ namespace CsToTs.TypeScript {
 
                 var parameters = method.GetParameters()
                     .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.ParameterType, context)));
-                var methodDefinition = new MethodDefinition(methodDeclaration, parameters);
+                var methodDefinition = new MethodDefinition(methodDeclaration, parameters, decorators: useDecorators(method).ToList());
 
                 if (shouldGenerateMethod(method, methodDefinition)) {
                     retVal.Add(methodDefinition);
