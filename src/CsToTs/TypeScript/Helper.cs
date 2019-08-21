@@ -156,13 +156,15 @@ namespace CsToTs.TypeScript {
         }
         
         private static IEnumerable<MemberDefinition> GetMembers(Type type, TypeScriptContext context) {
+            var memberRenamer = context.Options.MemberRenamer ?? new Func<string,string>(x => x);
+
             var memberDefs = type.GetFields(BindingFlags)
-                .Select(f => new MemberDefinition(f.Name, GetTypeRef(f.FieldType, context)))
+                .Select(f => new MemberDefinition(memberRenamer(f.Name), GetTypeRef(f.FieldType, context)))
                 .ToList();
 
             memberDefs.AddRange(
                 type.GetProperties(BindingFlags)
-                    .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.PropertyType, context)))
+                    .Select(p => new MemberDefinition(memberRenamer(p.Name), GetTypeRef(p.PropertyType, context)))
             );
             
             return memberDefs;
@@ -172,17 +174,20 @@ namespace CsToTs.TypeScript {
             var shouldGenerateMethod = context.Options.ShouldGenerateMethod;
             if (shouldGenerateMethod == null) return Enumerable.Empty<MethodDefinition>();
 
+            var memberRenamer = context.Options.MemberRenamer ?? new Func<string,string>(x => x);
+
             var retVal = new List<MethodDefinition>();
             var methods = type.GetMethods(BindingFlags).Where(m => !m.IsSpecialName);
             foreach (var method in methods) {
                 string methodDeclaration;
                 if (method.IsGenericMethod) {
-                    var methodName = method.Name;
+                    var methodName = memberRenamer(method.Name);
+                    
                     var genericPrms = method.GetGenericArguments().Select(t => GetTypeRef(t, context));
                     methodDeclaration = $"{methodName}<{string.Join(", ", genericPrms)}>";
                 }
                 else {
-                    methodDeclaration = method.Name;
+                    methodDeclaration = memberRenamer(method.Name);
                 }
 
                 var parameters = method.GetParameters()
