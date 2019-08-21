@@ -236,7 +236,7 @@ namespace CsToTs.Tests {
         public void ShouldGenerateMethods() {
             var options = new TypeScriptOptions {
                 ShouldGenerateMethod = (m, md) => {
-                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions"));
+                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions", new List<string>()));
                     md.Lines.Add($"return window.ajax('{m.Name}')");
                     return true;
                 }
@@ -250,6 +250,19 @@ namespace CsToTs.Tests {
             Assert.Contains("return window.ajax('Get')", testApi);
             Assert.Contains("Query<TItem>(", testApi);
             Assert.Equal(4, Regex.Matches(testApi, "(options: AjaxOptions)").Count);
+        }
+
+        [Fact]
+        public void ShouldGenerateDecorators() {
+            var options = new TypeScriptOptions {
+                UseDecorators = _ => new string[]{ "@foo()" }
+            };
+
+            var gen = Generator.GenerateTypeScript(typeof(Company<Address>), options);
+
+            var company = GetGeneratedType(gen, "export class Company");
+            Assert.NotEmpty(company);
+            Assert.Contains("@foo(", company);
         }
 
         [Fact]

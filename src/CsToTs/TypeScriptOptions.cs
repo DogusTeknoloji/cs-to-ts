@@ -28,5 +28,6 @@ namespace CsToTs {
         public Func<MemberInfo, string> MemberRenamer { get; set; }
         public Func<Type, CtorDefinition> CtorGenerator { get; set; }
         public Func<MethodInfo, MethodDefinition, bool> ShouldGenerateMethod { get; set; }
+        public Func<MemberInfo, IEnumerable<string>> UseDecorators { get; set; }
     }
 }

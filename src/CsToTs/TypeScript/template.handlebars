@@ -2,6 +2,9 @@
     
 {{Declaration}} {
     {{#Members}}
+    {{#Decorators}}
+    {{.}}
+    {{/Decorators}}
     {{Name}}: {{Type}};
     {{/Members}}
     {{#if Ctor}}
@@ -13,7 +16,9 @@
     }
     {{/if}}
     {{#Methods}}
-    
+    {{#Decorators}}
+    {{.}}
+    {{/Decorators}}
     {{Declaration}}({{ParameterStr}}) {
         {{#Lines}}
         {{this}}
