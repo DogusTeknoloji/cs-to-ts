@@ -156,14 +156,16 @@ namespace CsToTs.TypeScript {
         }
         
         private static IEnumerable<MemberDefinition> GetMembers(Type type, TypeScriptContext context) {
+            var memberRenamer = context.Options.MemberRenamer ?? new Func<MemberInfo,string>(x => x.Name);
             var useDecorators = context.Options.UseDecorators ?? new Func<MemberInfo, IEnumerable<string>>(_=> (new List<string>()));
+
             var memberDefs = type.GetFields(BindingFlags)
-                .Select(f => new MemberDefinition(f.Name, GetTypeRef(f.FieldType, context), useDecorators(f).ToList()))
+                .Select(f => new MemberDefinition(memberRenamer(f), GetTypeRef(f.FieldType, context), useDecorators(f).ToList()))
                 .ToList();
 
             memberDefs.AddRange(
                 type.GetProperties(BindingFlags)
-                    .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.PropertyType, context), useDecorators(p).ToList()))
+                    .Select(p => new MemberDefinition(memberRenamer(p), GetTypeRef(p.PropertyType, context), useDecorators(p).ToList()))
             );
             
             return memberDefs;
@@ -174,17 +176,20 @@ namespace CsToTs.TypeScript {
             var shouldGenerateMethod = context.Options.ShouldGenerateMethod;
             if (shouldGenerateMethod == null) return Enumerable.Empty<MethodDefinition>();
 
+            var memberRenamer = context.Options.MemberRenamer ?? new Func<MemberInfo,string>(x => x.Name);
+
             var retVal = new List<MethodDefinition>();
             var methods = type.GetMethods(BindingFlags).Where(m => !m.IsSpecialName);
             foreach (var method in methods) {
                 string methodDeclaration;
                 if (method.IsGenericMethod) {
-                    var methodName = method.Name;
+                    var methodName = memberRenamer(method);
+                    
                     var genericPrms = method.GetGenericArguments().Select(t => GetTypeRef(t, context));
                     methodDeclaration = $"{methodName}<{string.Join(", ", genericPrms)}>";
                 }
                 else {
-                    methodDeclaration = method.Name;
+                    methodDeclaration = memberRenamer(method);
                 }
 
                 var parameters = method.GetParameters()
