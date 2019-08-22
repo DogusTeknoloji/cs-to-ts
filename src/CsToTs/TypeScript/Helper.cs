@@ -172,29 +172,32 @@ namespace CsToTs.TypeScript {
         }
 
         private static IEnumerable<MethodDefinition> GetMethods(Type type, TypeScriptContext context) {
-            var useDecorators = context.Options.UseDecorators ?? new Func<MemberInfo, IEnumerable<string>>(_=> (new List<string>()));
             var shouldGenerateMethod = context.Options.ShouldGenerateMethod;
             if (shouldGenerateMethod == null) return Enumerable.Empty<MethodDefinition>();
 
-            var memberRenamer = context.Options.MemberRenamer ?? new Func<MemberInfo,string>(x => x.Name);
+            var useDecorators = context.Options.UseDecorators ?? (_ => new List<string>());
+            var memberRenamer = context.Options.MemberRenamer ?? (x => x.Name);
 
             var retVal = new List<MethodDefinition>();
             var methods = type.GetMethods(BindingFlags).Where(m => !m.IsSpecialName);
             foreach (var method in methods) {
-                string methodDeclaration;
+                string declaration;
                 if (method.IsGenericMethod) {
                     var methodName = memberRenamer(method);
                     
                     var genericPrms = method.GetGenericArguments().Select(t => GetTypeRef(t, context));
-                    methodDeclaration = $"{methodName}<{string.Join(", ", genericPrms)}>";
+                    declaration = $"{methodName}<{string.Join(", ", genericPrms)}>";
                 }
                 else {
-                    methodDeclaration = memberRenamer(method);
+                    declaration = memberRenamer(method);
                 }
 
                 var parameters = method.GetParameters()
                     .Select(p => new MemberDefinition(p.Name, GetTypeRef(p.ParameterType, context)));
-                var methodDefinition = new MethodDefinition(methodDeclaration, parameters, decorators: useDecorators(method).ToList());
+                
+                var decorators = useDecorators(method);
+                    
+                var methodDefinition = new MethodDefinition(declaration, parameters, decorators);
 
                 if (shouldGenerateMethod(method, methodDefinition)) {
                     retVal.Add(methodDefinition);

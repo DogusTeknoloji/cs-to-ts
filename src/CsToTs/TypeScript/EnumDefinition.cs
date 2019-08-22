@@ -9,7 +9,7 @@ namespace CsToTs.TypeScript {
         public EnumDefinition(Type clrType, string name, IEnumerable<EnumField> fields) {
             ClrType = clrType;
             Name = name;
-            Fields = (fields ?? Array.Empty<EnumField>()).ToList().AsReadOnly();
+            Fields = (fields?.ToList() ?? new List<EnumField>()).AsReadOnly();
         }
         
         public Type ClrType { get; }
