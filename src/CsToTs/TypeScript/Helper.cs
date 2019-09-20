@@ -159,15 +159,37 @@ namespace CsToTs.TypeScript {
             var memberRenamer = context.Options.MemberRenamer ?? new Func<MemberInfo,string>(x => x.Name);
             var useDecorators = context.Options.UseDecorators ?? new Func<MemberInfo, IEnumerable<string>>(_=> (new List<string>()));
 
+
             var memberDefs = type.GetFields(BindingFlags)
-                .Select(f => new MemberDefinition(memberRenamer(f), GetTypeRef(f.FieldType, context), useDecorators(f).ToList()))
+                .Select(f => {
+                    var fieldType = f.FieldType;
+                    var nullable = false;
+                    if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        // choose the generic parameter, rather than the nullable
+                        fieldType = fieldType.GetGenericArguments()[0];
+                        nullable = true;
+                    }
+
+                    return new MemberDefinition(memberRenamer(f), GetTypeRef(fieldType, context), nullable, useDecorators(f).ToList());
+                })
                 .ToList();
 
             memberDefs.AddRange(
                 type.GetProperties(BindingFlags)
-                    .Select(p => new MemberDefinition(memberRenamer(p), GetTypeRef(p.PropertyType, context), useDecorators(p).ToList()))
-            );
-            
+                .Select(p => {
+                    var propertyType = p.PropertyType;
+                    var nullable = false;
+                    if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        // choose the generic parameter, rather than the nullable
+                        propertyType = propertyType.GetGenericArguments()[0];
+                        nullable = true;
+                    }
+                        return new MemberDefinition(memberRenamer(p), GetTypeRef(propertyType, context), nullable, useDecorators(p).ToList());
+                    })
+                );
+
             return memberDefs;
         }
 

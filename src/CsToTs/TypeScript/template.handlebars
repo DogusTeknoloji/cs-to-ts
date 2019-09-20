@@ -1,11 +1,11 @@
 {{#Types}}
-    
+
 {{Declaration}} {
     {{#Members}}
     {{#Decorators}}
     {{.}}
     {{/Decorators}}
-    {{Name}}: {{Type}};
+    {{Name}}{{#IsNullable}}?{{/IsNullable}}: {{Type}};
     {{/Members}}
     {{#if Ctor}}
 
