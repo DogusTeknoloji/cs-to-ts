@@ -6,5 +6,6 @@ namespace CsToTs.Tests.Fixture {
         public string Detail { get; set; }
         public long PostalCode;
         public bool? Overseas { get; set; }
+        public int? PoBox;
     }
 }
