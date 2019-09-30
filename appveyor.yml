@@ -34,5 +34,3 @@ deploy:
     secure: b157yk1rsget3bmhg26sktus
   skip_symbols: false
   artifact: /.CsToTs*\.nupkg/
-  on:
-    appveyor_repo_tag: true
