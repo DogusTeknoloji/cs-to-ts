@@ -29,8 +29,9 @@ test_script:
 
 deploy:
   provider: NuGet
-  symbol_server: https://ci.appveyor.com/nuget/cs-to-ts-64r57smi2m2w/api/v2/package
   api_key:
-    secure: IY6yNKHo49GXJemOISi23ZvgFkt3YPlZYLKCHXkxvSQ=
+    secure: hQY0HMU8ADJvqFfivG/Z0+h2Nz8xFCFd64ERHhaTFc3SzRy3Kz8C3FE8tiJMqMjz
   skip_symbols: false
   artifact: /.CsToTs*\.nupkg/
+  on:
+    appveyor_repo_tag: true
