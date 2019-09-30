@@ -76,6 +76,8 @@ namespace CsToTs.Tests {
             Assert.Contains("City: string", address);
             Assert.Contains("Detail: string", address);
             Assert.Contains("PostalCode: number", address);
+            Assert.Contains("Overseas?: boolean", address);
+            Assert.Contains("PoBox?: number", address);
 
             var company = GetGeneratedType(gen, "export class Company");
             Assert.NotEmpty(company);
@@ -236,7 +238,7 @@ namespace CsToTs.Tests {
         public void ShouldGenerateMethods() {
             var options = new TypeScriptOptions {
                 ShouldGenerateMethod = (m, md) => {
-                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions", new List<string>()));
+                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions", false, new List<string>()));
                     md.Lines.Add($"return window.ajax('{m.Name}')");
                     return true;
                 }
