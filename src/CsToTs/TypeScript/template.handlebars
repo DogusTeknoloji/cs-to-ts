@@ -1,3 +1,12 @@
+{{#Enums}}
+
+export enum {{Name}} {
+    {{#Fields}}
+    {{Name}} = {{Value}},
+    {{/Fields}}
+}
+{{/Enums}}
+
 {{#Types}}
 
 {{Declaration}} {
@@ -27,12 +36,4 @@
     {{/Methods}}
 }
 {{/Types}}
-{{#Enums}}
-
-export enum {{Name}} {
-    {{#Fields}}
-    {{Name}} = {{Value}},
-    {{/Fields}}
-}
-{{/Enums}}
 
