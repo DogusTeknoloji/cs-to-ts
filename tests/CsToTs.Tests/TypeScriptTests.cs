@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using CsToTs.Tests.Fixture;
 using Xunit;
@@ -88,7 +88,7 @@ namespace CsToTs.Tests {
 
             var constraints = Regex.Match(company, "<.*?>").Value;
             Assert.Contains("Address", constraints);
-            Assert.Contains("TAddress extends Address & { new(): TAddress }", constraints);
+            Assert.Contains("TAddress extends Address", constraints);
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace CsToTs.Tests {
 
             var constraints = Regex.Match(company, "<.*?>").Value;
             Assert.Contains("Address", constraints);
-            Assert.Contains("TAddress extends Address & { new(): TAddress }", constraints);
+            Assert.Contains("TAddress extends Address", constraints);
         }
 
         [Fact]
@@ -238,7 +238,7 @@ namespace CsToTs.Tests {
         public void ShouldGenerateMethods() {
             var options = new TypeScriptOptions {
                 ShouldGenerateMethod = (m, md) => {
-                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions", false, new List<string>()));
+                    md.Parameters.Add(new TypeScript.MemberDefinition("options", "AjaxOptions", false, Enumerable.Empty<string>()));
                     md.Lines.Add($"return window.ajax('{m.Name}')");
                     return true;
                 }

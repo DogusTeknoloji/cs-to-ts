@@ -78,12 +78,6 @@ namespace CsToTs.TypeScript {
                         .Select(c => GetTypeRef(c, context))
                         .ToList();
 
-                    if (g.IsClass
-                        && (useInterface == null || !useInterface(type))
-                        && g.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint)) {
-                        constraints.Add($"{{ new(): {g.Name} }}");
-                    }
-
                     if (constraints.Any()) {
                         return $"{g.Name} extends {string.Join(" & ", constraints)}";
                     }
