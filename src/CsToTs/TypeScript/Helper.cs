@@ -141,7 +141,7 @@ namespace CsToTs.TypeScript {
             if (existing != null) return existing;
 
             var members = Enum.GetNames(type)
-                .Select(n => new EnumField(n, Convert.ToInt32(Enum.Parse(type, n)).ToString()));
+                .Select(n => new EnumField(n, context.Options.UseStringsForEnums ? $"\"{n}\"" : Convert.ToInt32(Enum.Parse(type, n)).ToString()));
 
             var def = new EnumDefinition(type, ApplyRename(type.Name, context), members);
             context.Enums.Add(def);

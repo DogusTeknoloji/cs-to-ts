@@ -55,6 +55,21 @@ namespace CsToTs.Tests {
         }
 
         [Fact]
+        public void ShouldGenerateStringsForEnumsWhenConfigured()
+        {
+            TypeScriptOptions options = new TypeScriptOptions
+            {
+                UseStringsForEnums = true
+            };
+            var gen = Generator.GenerateTypeScript(options, typeof(EntityWithEnum));
+
+            var typeEnum = GetGeneratedType(gen, "export enum TypeEnum");
+
+            Assert.NotEmpty(typeEnum);
+            Assert.Contains("Type1 = \"Type1\"", typeEnum);
+            Assert.Contains("Type2 = \"Type2\"", typeEnum);
+        }
+        [Fact]
         public void ShouldGenerateOpenForClosedGenericClass() {
             var gen = Generator.GenerateTypeScript(typeof(BaseEntity<int>));
 
