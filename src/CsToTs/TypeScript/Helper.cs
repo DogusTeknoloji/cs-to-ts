@@ -236,8 +236,25 @@ namespace CsToTs.TypeScript {
             if (typeCode != TypeCode.Object) 
                 return GetPrimitiveMemberType(typeCode, context.Options);
 
-            var enumerable = type.GetInterfaces()
-                .FirstOrDefault(i => i.IsConstructedGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            Type dictionaryType;
+            if (IsClosedDictionaryType(type))
+                dictionaryType = type;
+            else
+                dictionaryType = type.GetInterfaces().FirstOrDefault(IsClosedDictionaryType);
+
+            if (dictionaryType != null)
+            {
+                var keyType = type.GetGenericArguments().ElementAt(0);
+                var valueType = type.GetGenericArguments().ElementAt(1);
+                return $"Record<{GetTypeRef(keyType, context)}, {GetTypeRef(valueType, context)}>";
+            }
+
+            Type enumerable;
+            if (IsClosedEnumerableType(type))
+                enumerable = type;
+            else 
+                enumerable = type.GetInterfaces().FirstOrDefault(IsClosedEnumerableType);
+
             if (enumerable != null)
                 return $"Array<{GetTypeRef(enumerable.GetGenericArguments().First(), context)}>";
                 
@@ -302,5 +319,11 @@ namespace CsToTs.TypeScript {
                 return reader.ReadToEnd();
             }
         }
+
+        private static bool IsClosedEnumerableType(Type type) =>
+            type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+
+        private static bool IsClosedDictionaryType(Type type) =>
+            type.IsConstructedGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) || type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
     }
 }
