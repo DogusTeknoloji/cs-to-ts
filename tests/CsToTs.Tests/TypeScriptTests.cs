@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CsToTs.Tests.Fixture;
@@ -52,6 +53,50 @@ namespace CsToTs.Tests {
             Assert.NotEmpty(typeEnum);
             Assert.Contains("Type1 = 2", typeEnum);
             Assert.Contains("Type2 = 5", typeEnum);
+        }
+
+        [Fact]
+        public void ShouldGenerateStringsForEnumsWhenConfigured()
+        {
+            TypeScriptOptions options = new TypeScriptOptions
+            {
+                UseStringsForEnums = true
+            };
+            var gen = Generator.GenerateTypeScript(options, typeof(EntityWithEnum));
+
+            var typeEnum = GetGeneratedType(gen, "export enum TypeEnum");
+
+            Assert.NotEmpty(typeEnum);
+            Assert.Contains("Type1 = \"Type1\"", typeEnum);
+            Assert.Contains("Type2 = \"Type2\"", typeEnum);
+        }
+
+        [Fact]
+        public void ShouldGenerateMembersWithCamelCaseWhenConfigured()
+        {
+            TypeScriptOptions options = new TypeScriptOptions
+            {
+                MemberRenamer = info => new Regex("^.").Replace(info.Name, match => match.Value.ToLowerInvariant())
+            };
+            var gen = Generator.GenerateTypeScript(options, typeof(Address));
+            var address = GetGeneratedType(gen, "export class Address");
+            Assert.NotEmpty(address);
+            Assert.Contains("companyId: number", address);
+            Assert.Contains("city: string", address);
+            Assert.Contains("detail: string", address);
+            Assert.Contains("postalCode: number", address);
+            Assert.Contains("overseas?: boolean", address);
+            Assert.Contains("poBox?: number", address);
+        }
+        [Fact]
+        public void ShouldGenerateMembersWithCollections()
+        {
+            var gen = Generator.GenerateTypeScript(typeof(EntityWithCollections));
+            var address = GetGeneratedType(gen, "export class EntityWithCollections");
+            Assert.NotEmpty(address);
+            Assert.Contains("EnumerableOfStrings: Array<string>", address);
+            Assert.Contains("IDictionaryOfStringsToNumbers: Record<string, number>", address);
+            Assert.Contains("DictionaryOfStringsToNumbers: Record<string, number>", address);
         }
 
         [Fact]
