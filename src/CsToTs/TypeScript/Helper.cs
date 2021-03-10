@@ -244,8 +244,8 @@ namespace CsToTs.TypeScript {
 
             if (dictionaryType != null)
             {
-                var keyType = type.GetGenericArguments().ElementAt(0);
-                var valueType = type.GetGenericArguments().ElementAt(1);
+                var keyType = dictionaryType.GetGenericArguments().ElementAt(0);
+                var valueType = dictionaryType.GetGenericArguments().ElementAt(1);
                 return $"Record<{GetTypeRef(keyType, context)}, {GetTypeRef(valueType, context)}>";
             }
 

@@ -334,6 +334,14 @@ namespace CsToTs.Tests {
             Assert.Equal(3, GetTypeCount(gen));
         }
 
+        [Fact]
+        public void IsTheProblemWithDictionaryObjects() {
+            var gen = Generator.GenerateTypeScript(typeof(ClassWithSubclassOfDictionary));
+
+            var containerClass = GetGeneratedType(gen, @"export class ClassWithSubclassOfDictionary");
+            Assert.Contains("AProperty: Record<string, string>;", containerClass);
+        }
+
         private static string GetGeneratedType(string generated, string declaration) {
             var match = Regex.Match(generated, declaration + @".*?(export|$)", RegexOptions.Singleline);
 
