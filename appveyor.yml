@@ -26,3 +26,10 @@ after_build:
 
 test_script:
 - dotnet test -c %CONFIGURATION% tests\CsToTs.Tests\CsToTs.Tests.csproj
+
+deploy:
+  provider: NuGet
+  api_key:
+    secure: iFXQrtEtCwEvvwQIaaOVdsNozRMccmiAq1PnQNbe0LfLrSzHHlTVJBN7I5xLkVO0
+  skip_symbols: false
+  artifact: /.*(\.|\.s)nupkg/
