@@ -30,5 +30,6 @@ namespace CsToTs {
         public Func<Type, CtorDefinition> CtorGenerator { get; set; }
         public Func<MethodInfo, MethodDefinition, bool> ShouldGenerateMethod { get; set; }
         public Func<MemberInfo, IEnumerable<string>> UseDecorators { get; set; }
+        public Func<Type, string> TypeMapOverride { get; set; }
     }
 }

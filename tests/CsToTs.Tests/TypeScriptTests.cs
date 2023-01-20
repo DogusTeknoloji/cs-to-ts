@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using CsToTs.Tests.Fixture;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace CsToTs.Tests {
@@ -340,6 +343,28 @@ namespace CsToTs.Tests {
 
             var containerClass = GetGeneratedType(gen, @"export class ClassWithSubclassOfDictionary");
             Assert.Contains("AProperty: Record<string, string>;", containerClass);
+        }
+
+        [Fact]
+        public void ShouldOverrideTypes()
+        {
+            var dict = new Dictionary<Type, string>
+            {
+                {typeof(DateTimeOffset), "Date"},
+                {typeof(JObject), "Record<string, any>"},
+                {typeof(HttpStatusCode), "number"},
+                {typeof(Guid), "string"},
+            };
+
+            var output = Generator.GenerateTypeScript(typeof(EntityWithMoreTypes), new TypeScriptOptions
+            {
+                TypeMapOverride = t => dict.TryGetValue(t, out var mappedType) ? mappedType : null
+            });
+
+            Assert.Contains("DateTimeOffset: Date", output);
+            Assert.Contains("JObject: Record<string, any>", output);
+            Assert.Contains("HttpStatusCode: number", output);
+            Assert.Contains("Guid: string", output);
         }
 
         private static string GetGeneratedType(string generated, string declaration) {
