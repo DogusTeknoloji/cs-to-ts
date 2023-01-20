@@ -224,6 +224,10 @@ namespace CsToTs.TypeScript {
         }
 
         private static string GetTypeRef(Type type, TypeScriptContext context) {
+            var typeOverride = context.Options.TypeMapOverride?.Invoke(type);
+            if (typeOverride != null)
+                return typeOverride;
+
             if (type.IsGenericParameter)
                 return type.Name;
 
